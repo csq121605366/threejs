@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 01.02 - First Scene</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+        // once everything is loaded, we run our Three.js stuff.
+        function init() {
+
+            // 创建一个场景
+            var scene = new THREE.Scene();
+
+            // create a camera, which defines where we're looking at.
+            // 创建一个相机，定义我从哪里看
+            // PerspectiveCamera( fov, aspect, near, far )
+            // fov:相机视垂体垂直视角
+            // aspect：相机视垂体宽高比
+            // near：相机视垂体近剪裁面
+            // far：相机视垂体远裁剪面
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            // create a render and set the size
+            // 创建一个渲染器并且设置它的大小和颜色
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor();
+            renderer.setClearColor(new THREE.Color(0xEEEEEE));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // show axes in the screen
+            // 创建轴辅助线
+            // AxisHelper(size)
+            // size：定义辅助线的长度
+            var axes = new THREE.AxisHelper(30);
+            scene.add(axes);
+
+            // create the ground plane
+            // 创建平面模型
+            // PlaneGeometry(width, height, widthSegments, heightSegments)
+            // width：宽度
+            // height：高度
+            // widthSegments — 可选参数：x方向的分段数，缺省为1
+            // heightSegments — 可选参数，y方向的分段数，缺省为1。
+
+            // var planeGeometry = new THREE.PlaneGeometry(60, 20, 1, 1);
+            // 缓存几何模型。构造函数的每个参数均可通过对象的参数属性来访问。实例化之后任何这些属性的修改不会改变已有几何模型。
+            var planeGeometry = new THREE.PlaneBufferGeometry(60, 20, 1, 1);
+            // 创建材质
+            // 基础网孔材料，一个以简单着色（平面或线框）方式来绘制几何形状的材料。材料不受灯光影响
+            // 默认将呈现为平面多边形，要将网孔绘制为线框，只需要设置“线框(wireframe)”为true
+            // MeshBasicMaterial( parameters )
+            // 参数是一个使用一个或多个属性定义材料外观的对象。
+            // color — 线条的十六进制颜色。缺省值为 0xffffff。
+            // map — 设置纹理贴图。缺省为null。
+            // aoMap — 设置环境遮挡贴图（ao = ambient occlusion）。缺省为null。
+            // aoMapIntensity — 设置环境遮挡贴图强度。缺省为1。
+            // specularMap — 设置高光贴图。默认为null。
+            // alphaMap — 设置阿尔法贴图。默认为null。
+            // envMap — 设置环境贴图。默认为null。
+            // combine — 设置组合操作。默认值是THREE.MultiplyOperation.
+            // reflectivity — 设置反射率。默认值是 1.
+            // refractionRatio — 设置折射率。默认值是 0.98.
+            // fog — 定义材质颜色是否受全局雾设置的影响。默认是true。
+            // shading — 定义着色类型。缺省为 THREE.SmoothShading。
+            // wireframe — 渲染模型为线框。默认是false。
+            // wireframeLinewidth — 线框线宽。默认是1。
+            // wireframeLinecap — 定义线端的外观。默认值是 'round'.  "butt", "round" and "square"
+            // wireframeLinejoin — 定义线连接节点的外观。默认值是 'round'."round", "bevel" and "miter".
+            // vertexColors — 定义顶点如何着色。默认值是 THREE.NoColors.
+            // skinning — 定义材料是否使用皮肤。默认值是false.
+            // morphTargets — 定义材料是否使用 morphTargets。默认值是 false。
+            var planeMaterial = new THREE.MeshBasicMaterial({
+                color: 0xcccccc,
+                wireframe:false
+            });
+            // 网孔（Mesh），网孔对象的基类。将模型和材料添加到plane这个对象中
+            // Mesh( geometry, material )
+            // geometry:一个几何模型的实例
+            // material:材料的实例
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+            // rotate and position the plane
+            // 定义plane模型的位置
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.x = 15;
+            plane.position.y = 0;
+            plane.position.z = 0;
+
+
+            // add the plane to the scene
+            // 将模型添加到场景中
+            scene.add(plane);
+
+            // create a cube
+            // 创建一个四边形几何类,它通常用于创建具有“宽度”、“高度”和“深度”参数的立方体或不规则四边形模型。
+            // BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)
+            // width — X轴上的面的宽度.
+            // height — Y轴上的面的高度.
+            // depth — Z轴上的面的深度.
+            // widthSegments — 可选参数. 沿宽度面的分割面数量. 默认值为1.
+            // heightSegments — 可选参数. 沿高度面的分割面数量. 默认值为1.
+            // depthSegments — 可选参数. 沿深度面的分割面数量. 默认值为1.
+            var cubeGeometry = new THREE.BoxGeometry(4, 4, 4,4,4,4);
+            var cubeMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                wireframe: true
+            });
+            var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+            // position the cube
+            cube.position.x = -4;
+            cube.position.y = 3;
+            cube.position.z = 0;
+
+            // add the cube to the scene
+            scene.add(cube);
+
+            // create a sphere
+            var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+            var sphereMaterial = new THREE.MeshBasicMaterial({
+                color: 0x7777ff,
+                wireframe: true
+            });
+            var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+            // position the sphere
+            sphere.position.x = 20;
+            sphere.position.y = 4;
+            sphere.position.z = 2;
+
+            // add the sphere to the scene
+            scene.add(sphere);
+
+            // position and point the camera to the center of the scene
+            camera.position.x = -30;
+            camera.position.y = 40;
+            camera.position.z = 30;
+            camera.lookAt(scene.position);
+
+            // add the output of the renderer to the html element
+            // 将canvas添加到页面中
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+            // render the scene
+            // 渲染器渲染对象
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>

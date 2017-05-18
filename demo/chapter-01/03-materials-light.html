@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 01.03 - Materials and light</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+
+    // once everything is loaded, we run our Three.js stuff.
+    function init() {
+
+        // create a scene, that will hold all our elements such as objects, cameras and lights.
+        var scene = new THREE.Scene();
+
+        // create a camera, which defines where we're looking at.
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // create a render and set the size
+        var renderer = new THREE.WebGLRenderer();
+
+        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // 渲染器增加阴影
+        renderer.shadowMapEnabled = true;
+
+        // show axes in the screen
+        // 创建轴辅助线
+        // AxisHelper(size)
+        // size：定义辅助线的长度
+        var axes = new THREE.AxisHelper(30);
+
+        scene.add(axes);
+
+        // create the ground plane
+        var planeGeometry = new THREE.PlaneGeometry(60, 20);
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        // 设置接受阴影的对象
+        plane.receiveShadow = true;
+
+        // rotate and position the plane
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.x = 15;
+        plane.position.y = 0;
+        plane.position.z = 0;
+
+        // add the plane to the scene
+        scene.add(plane);
+
+        // create a cube
+        var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+        var cubeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        // 投射阴影开关为true
+        cube.castShadow = true;
+
+        // position the cube
+        cube.position.x = -4;
+        cube.position.y = 3;
+        cube.position.z = 0;
+
+        // add the cube to the scene
+        scene.add(cube);
+
+        var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+        // position the sphere
+        sphere.position.x = 20;
+        sphere.position.y = 4;
+        sphere.position.z = 2;
+        sphere.castShadow = true;
+
+        // add the sphere to the scene
+        scene.add(sphere);
+
+        // position and point the camera to the center of the scene
+        camera.position.x = -30;
+        camera.position.y = 40;
+        camera.position.z = 30;
+        camera.lookAt(scene.position);
+
+        // add spotlight for the shadows
+        // 创建灯光
+        // SpotLight( color, intensity, distance, angle, penumbra, decay )
+        // color:十六进制颜色，默认0xffffff(white)
+        // intensity:强度/亮度的程度
+        // distance:光的长度
+        // angule:从其上限的方向的最大光散射角为Math.PI / 2。
+        // penumbra：由于半影而衰减的聚光灯锥体的百分比。取0到1之间的值。默认值为零。==>相当于光的模糊程度
+        // decay:光线沿着光线的距离变暗。
+        // 该类继承于Light
+        var spotLight = new THREE.SpotLight(0xffffff);
+        // 设置灯光的位置
+        spotLight.position.set(-40, 60, -10);
+        spotLight.castShadow = true;
+        // spotLight.shadowMapHeight:灯光的高度
+        spotLight.shadowMapHeight = 1024 ;
+        // spotLight.shadowMapWidth:灯光的宽度
+        spotLight.shadowMapWidth = 1024;
+        // spotLight.shadowCameraNear:灯光的近光距离
+        spotLight.shadowCameraNear = 50;
+        // spotLight.shadowCameraFar:灯光的远光距离
+        spotLight.shadowCameraFar = 5000;
+        // spotLight.shadowCameraFov:灯光的模糊程度
+        spotLight.shadowCameraFov = 10000000;
+
+       
+        scene.add(spotLight);
+        
+
+        // add the output of the renderer to the html element
+        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+        // call the render function
+        renderer.render(scene, camera);
+    }
+    window.onload = init;
+
+
+</script>
+</body>
+</html>
