@@ -48,6 +48,33 @@
 
         // create the ground plane
         var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
+        // 兰伯特网孔材料,一种非发光材料（兰伯特）的表面，计算每个顶点。
+        // MeshLambertMaterial( parameters )
+        // color — 线条的十六进制颜色。缺省值为 0xffffff。
+        // map — 设置纹理贴图。缺省为null。
+        // lightMap — 设置光照贴图。缺省为null。
+        // lightMapIntensity — 设置光照贴图强度。缺省值为1。
+        // aoMap — 设置环境遮挡贴图（ao = ambient occlusion）。缺省为null。
+        // aoMapIntensity — 设置环境遮挡贴图强度。缺省为1。
+        // emissive - 设置放射光颜色。默认是0x000000.
+        // emissiveMap — 设置放射光贴图。缺省为null。
+        // emissiveIntensity — 设置放射光贴图强度。缺省值为1。
+        // specularMap — 设置高光贴图。默认为null。
+        // alphaMap — 设置阿尔法贴图。默认为null。
+        // envMap — 设置环境贴图。默认为null。
+        // combine — 设置组合操作。默认值是THREE.MultiplyOperation.
+        // reflectivity — 设置反射率。默认值是 1.
+        // refractionRatio — 设置折射率。默认值是 0.98.
+        // fog — 定义材质颜色是否受全局雾设置的影响。默认是true。
+        // shading — 定义着色类型。缺省为 THREE.SmoothShading。
+        // wireframe — 渲染模型为线框。默认是false。
+        // wireframeLinewidth — 线框线宽。默认是1。
+        // wireframeLinecap — 定义线端的外观。默认值是 'round'.
+        // wireframeLinejoin — 定义线连接节点的外观。默认值是 'round'.
+        // vertexColors — 定义顶点如何着色。默认值是 THREE.NoColors.
+        // skinning — 定义材料是否使用皮肤。默认值是false.
+        // morphTargets — 定义材料是否使用 morphTargets。默认值是 false。
+        // morphNormals — 定义材料是否使用morphNormals。默认是false。
         var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
         var plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.receiveShadow = true;
@@ -62,18 +89,20 @@
         scene.add(plane);
 
         // position and point the camera to the center of the scene
-        camera.position.x = -30;
+        camera.position.x = 0;
         camera.position.y = 40;
-        camera.position.z = 30;
+        camera.position.z = 50;
         camera.lookAt(scene.position);
 
         // add subtle ambient lighting
-        var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+        // 增加环境灯光,这种光全局照亮场景中的所有对象。
+        // AmbientLight( color, intensity )
+        var ambientLight = new THREE.AmbientLight(0x404040);
         scene.add(ambientLight);
 
         // add spotlight for the shadows
         var spotLight = new THREE.SpotLight(0xffffff);
-        spotLight.position.set(-40, 60, -10);
+        spotLight.position.set(0, 100, 0);
         spotLight.castShadow = true;
         scene.add(spotLight);
 
@@ -99,6 +128,7 @@
             this.addCube = function () {
 
                 var cubeSize = Math.ceil((Math.random() * 3));
+                // 盒子模型
                 var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
                 var cubeMaterial = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff});
                 var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -109,21 +139,22 @@
                 // position the cube randomly in the scene
 
                 cube.position.x = -30 + Math.round((Math.random() * planeGeometry.parameters.width));
-                cube.position.y = Math.round((Math.random() * 5));
+                cube.position.y = 10 + Math.round((Math.random() * 10));
                 cube.position.z = -20 + Math.round((Math.random() * planeGeometry.parameters.height));
 
                 // add the cube to the scene
                 scene.add(cube);
+
                 this.numberOfObjects = scene.children.length;
             };
 
             this.outputObjects = function () {
-                console.log(scene.children);
+                console.log(scene.children); 
             }
         };
 
         var gui = new dat.GUI();
-        gui.add(controls, 'rotationSpeed', 0, 0.5);
+        gui.add(controls, 'rotationSpeed', 0, 2);
         gui.add(controls, 'addCube');
         gui.add(controls, 'removeCube');
         gui.add(controls, 'outputObjects');
@@ -133,11 +164,9 @@
 
         function render() {
             stats.update();
-
             // rotate the cubes around its axes
             scene.traverse(function (e) {
                 if (e instanceof THREE.Mesh && e != plane) {
-
                     e.rotation.x += controls.rotationSpeed;
                     e.rotation.y += controls.rotationSpeed;
                     e.rotation.z += controls.rotationSpeed;

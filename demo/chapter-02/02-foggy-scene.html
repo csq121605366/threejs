@@ -18,14 +18,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -34,8 +34,15 @@
 
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-        //scene.fog=new THREE.FogExp2( 0xffffff, 0.015 );
-        scene.fog = new THREE.Fog(0xffffff, 0.015, 100);
+        
+        scene.overrideMaterial=new THREE.MeshLambertMaterial({color: 0xcccccc});
+        // scene.fog=new THREE.FogExp2( 0x88003F, 0.025);
+
+        // 创建雾效果.该类包含定义线性雾的参数，即随着距离线性增长的线性增长。
+        // Fog( hex, near, far )
+
+        scene.fog = new THREE.Fog( 0x88003F, 0.015, 100);
+
 
         // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -43,9 +50,21 @@
         // create a render and set the size
         var renderer = new THREE.WebGLRenderer();
 
-        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        // 设置颜色,默认设置颜色为白色
+        // new THREE.Color();
+        // 16进制
+        // new THREE.Color(0xff0000);
+        // RGB
+        // var color = new THREE.Color("rgb(255, 0, 0)");
+        // var color = new THREE.Color("rgb(100%, 0%, 0%)");
+        // HSL string
+        // var color = new THREE.Color("hsl(0, 100%, 50%)");
+        // rgb从0-1
+        // var color = new THREE.Color( 1, 0, 0 );
+        console.log(new THREE.Color(0xF7AD0A));
+        renderer.setClearColor(new THREE.Color(0xF7AD0A));
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMapEnabled = true;
+        renderer.shadowMap.enabled = true;
 
         // create the ground plane
         var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
@@ -69,7 +88,7 @@
         camera.lookAt(scene.position);
 
         // add subtle ambient lighting
-        var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+        var ambientLight = new THREE.AmbientLight(0xcccccc);
         scene.add(ambientLight);
 
         // add spotlight for the shadows
@@ -118,6 +137,10 @@
             this.outputObjects = function () {
                 console.log(scene.children);
             }
+
+            this.near=0.015;
+            this.far=100;
+
         };
 
         var gui = new dat.GUI();
@@ -126,16 +149,18 @@
         gui.add(controls, 'removeCube');
         gui.add(controls, 'outputObjects');
         gui.add(controls, 'numberOfObjects').listen();
+        gui.add(controls,'near',0,1);
+        gui.add(controls,'far',0,300);
 
         render();
-
+        console.log(scene.fog);
         function render() {
             stats.update();
-
-            // rotate the cubes around its axes
+            scene.fog.near=controls.near;
+            scene.fog.far=controls.far;
+            // rotate the cubes around its axes 
             scene.traverse(function (e) {
                 if (e instanceof THREE.Mesh && e != plane) {
-
                     e.rotation.x += controls.rotationSpeed;
                     e.rotation.y += controls.rotationSpeed;
                     e.rotation.z += controls.rotationSpeed;

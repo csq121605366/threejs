@@ -18,14 +18,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -33,7 +33,13 @@
         var stats = initStats();
 
         // create a scene, that will hold all our elements such as objects, cameras and lights.
+        // Scene：
+        // 参数：
+        // fog:设置雾
+        // overrideMaterial:覆盖材质
+        // autoUpdate:自动更新
         var scene = new THREE.Scene();
+        // 使用材质覆盖属性
         scene.overrideMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
 
         // create a camera, which defines where we're looking at.
@@ -44,7 +50,7 @@
 
         renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMapEnabled = true;
+        renderer.shadowMap.enabled = true;
 
         // create the ground plane
         var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
