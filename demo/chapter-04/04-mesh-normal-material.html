@@ -21,14 +21,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -52,7 +52,7 @@
         canvasRenderer.setSize(window.innerWidth, window.innerHeight);
         renderer = webGLRenderer;
 
-        var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
+        var groundGeom = new THREE.PlaneBufferGeometry(100, 100, 4, 4);
         var groundMesh = new THREE.Mesh(groundGeom, new THREE.MeshBasicMaterial({color: 0x777777}));
         groundMesh.rotation.x = -Math.PI / 2;
         groundMesh.position.y = -20;
@@ -73,21 +73,23 @@
         sphere.position.y = 3;
         sphere.position.z = 2;
 
-        for (var f = 0, fl = sphere.geometry.faces.length; f < fl; f++) {
+        var f = 0, fl = sphere.geometry.faces.length;
+        for (; f < fl; f++) {
             var face = sphere.geometry.faces[f];
             var centroid = new THREE.Vector3(0, 0, 0);
             centroid.add(sphere.geometry.vertices[face.a]);
             centroid.add(sphere.geometry.vertices[face.b]);
             centroid.add(sphere.geometry.vertices[face.c]);
-            centroid.divideScalar(3);
+            console.log(centroid);
+            centroid.divideScalar(2.8);
 
             var arrow = new THREE.ArrowHelper(
-                    face.normal,
-                    centroid,
-                    2,
-                    0x3333FF,
-                    0.5,
-                    0.5);
+                face.normal,
+                centroid,
+                2,
+                0x3333FF,
+                0.5,
+                0.5);
             sphere.add(arrow);
         }
 
@@ -164,14 +166,14 @@
             console.log(e);
             switch (e) {
                 case "front":
-                    meshMaterial.side = THREE.FrontSide;
-                    break;
+                meshMaterial.side = THREE.FrontSide;
+                break;
                 case "back":
-                    meshMaterial.side = THREE.BackSide;
-                    break;
+                meshMaterial.side = THREE.BackSide;
+                break;
                 case "double":
-                    meshMaterial.side = THREE.DoubleSide;
-                    break;
+                meshMaterial.side = THREE.DoubleSide;
+                break;
             }
             meshMaterial.needsUpdate = true;
 
@@ -182,41 +184,41 @@
                     // https://github.com/mrdoob/three.js/issues/1929
                     meshMaterial.shading = THREE.FlatShading;
                     break;
-                case "smooth":
+                    case "smooth":
                     meshMaterial.shading = THREE.SmoothShading;
                     break;
-            }
+                }
 
-            var oldPos = sphere.position.clone();
-            scene.remove(sphere);
-            scene.remove(plane);
-            scene.remove(cube);
-            sphere = new THREE.Mesh(sphere.geometry.clone(), meshMaterial);
-            cube = new THREE.Mesh(cube.geometry.clone(), meshMaterial);
-            plane = new THREE.Mesh(plane.geometry.clone(), meshMaterial);
+                var oldPos = sphere.position.clone();
+                scene.remove(sphere);
+                scene.remove(plane);
+                scene.remove(cube);
+                sphere = new THREE.Mesh(sphere.geometry.clone(), meshMaterial);
+                cube = new THREE.Mesh(cube.geometry.clone(), meshMaterial);
+                plane = new THREE.Mesh(plane.geometry.clone(), meshMaterial);
 
-            sphere.position = oldPos;
-            cube.position = oldPos;
-            plane.position = oldPos;
+                sphere.position = oldPos;
+                cube.position = oldPos;
+                plane.position = oldPos;
 
-            switch (controls.selectedMesh) {
-                case "cube":
+                switch (controls.selectedMesh) {
+                    case "cube":
                     scene.add(cube);
 
                     break;
-                case "sphere":
+                    case "sphere":
                     scene.add(sphere);
 
                     break;
-                case "plane":
+                    case "plane":
                     scene.add(plane);
                     break;
 
-            }
+                }
 
-            meshMaterial.needsUpdate = true;
-            console.log(meshMaterial);
-        });
+                meshMaterial.needsUpdate = true;
+                console.log(meshMaterial);
+            });
 
         spGui.add(controls, 'selectedMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
 
@@ -227,16 +229,16 @@
 
             switch (e) {
                 case "cube":
-                    scene.add(cube);
+                scene.add(cube);
 
-                    break;
+                break;
                 case "sphere":
-                    scene.add(sphere);
+                scene.add(sphere);
 
-                    break;
+                break;
                 case "plane":
-                    scene.add(plane);
-                    break;
+                scene.add(plane);
+                break;
 
             }
 

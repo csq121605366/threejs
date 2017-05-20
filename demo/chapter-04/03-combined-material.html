@@ -5,7 +5,7 @@
 <head>
     <title>Example 04.03 - Combined Material</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
+    <!-- <script src="https://cdn.bootcss.com/three.js/r83/three.js"></script> -->
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -43,7 +43,7 @@
 
         renderer.sortObjects = false;
 
-        renderer.setClearColor(new THREE.Color(0x00000, 1.0));
+        renderer.setClearColor(new THREE.Color(0x00000));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMapEnabled = true;
 
@@ -83,13 +83,15 @@
                 var cubeSize = Math.ceil(3 + (Math.random() * 3));
                 var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
 
-                //var cubeMaterial = new THREE.MeshLambertMaterial({color:  Math.random() * 0xffffff });
+                // var cubeMaterial = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff });
                 var cubeMaterial = new THREE.MeshDepthMaterial();
                 var colorMaterial = new THREE.MeshBasicMaterial({
-                    color: controls.color,
+                    color: Math.random() * 0xffffff,
                     transparent: true,
+                    opacity:0.4,
                     blending: THREE.MultiplyBlending
                 });
+                console.log(colorMaterial);
                 var cube = new THREE.SceneUtils.createMultiMaterialObject(cubeGeometry, [colorMaterial, cubeMaterial]);
                 cube.children[1].scale.set(0.99, 0.99, 0.99);
                 cube.castShadow = true;

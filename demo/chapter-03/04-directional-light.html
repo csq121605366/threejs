@@ -5,7 +5,7 @@
 <head>
     <title>Example 03.04 - Directional Light</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
+    <!-- <script src="https://cdn.bootcss.com/three.js/r83/three.js"></script> -->
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -18,14 +18,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -41,7 +41,7 @@
         // create a render and set the size
         var renderer = new THREE.WebGLRenderer();
 
-        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        renderer.setClearColor(new THREE.Color(0xEEEEEE));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMapEnabled = true;
 
@@ -122,6 +122,13 @@
 
         scene.add(directionalLight);
 
+        // 增加平行光帮助
+        var helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+        helper.visible=false;
+
+        
+        scene.add( helper );
+
 
         // add a small sphere simulating the pointlight
         var sphereLight = new THREE.SphereGeometry(0.2);
@@ -131,6 +138,7 @@
 
         sphereLightMesh.position = new THREE.Vector3(3, 20, 3);
         scene.add(sphereLightMesh);
+
 
 
         // add the output of the renderer to the html element
@@ -178,6 +186,8 @@
 
         gui.add(controls, 'debug').onChange(function (e) {
             directionalLight.shadowCameraVisible = e;
+            // console.log(helper);
+            helper.visible=e;
         });
 
         gui.add(controls, 'castShadow').onChange(function (e) {
@@ -192,14 +202,14 @@
             console.log(e);
             switch (e) {
                 case "Plane":
-                    directionalLight.target = plane;
-                    break;
+                directionalLight.target = plane;
+                break;
                 case "Sphere":
-                    directionalLight.target = sphere;
-                    break;
+                directionalLight.target = sphere;
+                break;
                 case "Cube":
-                    directionalLight.target = cube;
-                    break;
+                directionalLight.target = cube;
+                break;
             }
 
         });
@@ -209,6 +219,9 @@
 
         function render() {
             stats.update();
+
+            helper.update();
+
             // rotate the cube around its axes
             cube.rotation.x += controls.rotationSpeed;
             cube.rotation.y += controls.rotationSpeed;

@@ -4,8 +4,8 @@
 
 <head>
     <title>Example 03.02 - point Light</title>
-    <script type="text/javascript" src="../libs/three.js"></script>
-
+    <!-- <script type="text/javascript" src="../libs/three.js"></script> -->
+ <script src="https://cdn.bootcss.com/three.js/r83/three.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -41,7 +41,7 @@
         // create a render and set the size
         var renderer = new THREE.WebGLRenderer();
 
-        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        renderer.setClearColor(new THREE.Color(0xEEEEEE));
         renderer.setSize(window.innerWidth, window.innerHeight);
         // renderer.shadowMapEnabled = true;
 

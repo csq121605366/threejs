@@ -4,8 +4,8 @@
 
 <head>
     <title>Example 03.01 - Ambient Light</title>
-    <script type="text/javascript" src="../libs/three.js"></script>
-
+    <!-- <script type="text/javascript" src="../libs/three.js"></script> -->
+    <script src="https://cdn.bootcss.com/three.js/r83/three.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -18,14 +18,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -40,10 +40,10 @@
 
         // create a render and set the size
         var renderer = new THREE.WebGLRenderer();
-
-        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        var threeColor=new THREE.Color(0xEEEEEE)
+        renderer.setClearColor(threeColor);
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMapEnabled = true;
+        renderer.shadowMap.enabled = true;
 
         // create the ground plane
         var planeGeometry = new THREE.PlaneGeometry(60, 20, 1, 1);
@@ -118,8 +118,10 @@
         };
 
         var gui = new dat.GUI();
+        gui.add(controls, 'rotationSpeed',0,1)
+        gui.add(controls, 'bouncingSpeed',0,1)
         gui.addColor(controls, 'ambientColor').onChange(function (e) {
-            ambientLight.color = new THREE.Color(e);
+            ambientLight.color = threeColor.set(e);
         });
         gui.add(controls, 'disableSpotlight').onChange(function (e) {
             spotLight.visible = !e;

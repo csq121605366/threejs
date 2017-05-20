@@ -27,16 +27,16 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
-    var camera;
+        var camera;
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -53,12 +53,12 @@
 
         // create a render and set the size
 //        var renderer = new THREE.WebGLRenderer();
-        var renderer = new THREE.WebGLDeferredRenderer({
-            width: window.innerWidth,
-            height: window.innerHeight,
-            scale: 1, antialias: true,
-            tonemapping: THREE.FilmicOperator, brightness: 2.5
-        });
+var renderer = new THREE.WebGLDeferredRenderer({
+    width: window.innerWidth,
+    height: window.innerHeight,
+    scale: 1, antialias: true,
+    tonemapping: THREE.FilmicOperator, brightness: 2.5
+});
 
 //        renderer.setSize(window.innerWidth, window.innerHeight);
 //        renderer.shadowMapEnabled = true;
@@ -96,6 +96,9 @@
         spotLight0.intensity = 0.1;
         spotLight0.lookAt(plane);
         scene.add(spotLight0);
+
+        var spotLightHelper = new THREE.SpotLightHelper( spotLight0 );
+        scene.add( spotLightHelper );
 
 
         var areaLight1 = new THREE.AreaLight(0xff0000, 3);

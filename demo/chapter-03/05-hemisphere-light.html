@@ -4,9 +4,9 @@
 
 <head>
     <title>Example 03.05 - Directional Light</title>
-    <script type="text/javascript" src="../libs/three.js"></script>
-
-    <script type="text/javascript" src="../libs/stats.js"></script>
+    <!-- <script type="text/javascript" src="../libs/three.js"></script> -->
+    <script src="https://cdn.bootcss.com/three.js/r83/three.js"></script>
+    <script type="text/javascript" src="../libs/stats.js" ></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
         body {
@@ -18,14 +18,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -43,21 +43,52 @@
         // create a render and set the size
         var renderer = new THREE.WebGLRenderer();
 
-        renderer.setClearColor(new THREE.Color(0xaaaaff, 1.0));
+        renderer.setClearColor(new THREE.Color(0xaaaaff));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMapEnabled = true;
 
 
         // create the ground plane
-        var textureGrass = THREE.ImageUtils.loadTexture("../assets/textures/ground/grasslight-big.jpg");
-        textureGrass.wrapS = THREE.RepeatWrapping;
-        textureGrass.wrapT = THREE.RepeatWrapping;
-        textureGrass.repeat.set(4, 4);
+        // var textureGrass = THREE.ImageUtils.loadTexture("../assets/textures/ground/grasslight-big.jpg");
+        // textureGrass.wrapS = THREE.RepeatWrapping;
+        // textureGrass.wrapT = THREE.RepeatWrapping;
+        // textureGrass.repeat.set(4, 4);
+        // 
+        var loader=new THREE.TextureLoader();
+        loader.load('../assets/textures/ground/grasslight-big.jpg',
+            function (texture) {
+                // Texture创建一个纹理。应用于一个表面，或者作为一个反射或折射贴图。
+                // 属性
+                // id:此纹理实例的唯一编号。
+                // image:一个Image对象，通常使用 ImageUtils 或 ImageLoader 类来创建。Image对象可以包括图像 (比如 PNG, JPG, GIF, DDS), 视频 (e.g., MP4, OGG/OGV), 或者六幅图像的集合用于一个立方体贴图。 要使用视频作为一个纹理，你需要把一个HTML5视频元素作为纹理图像的源，并在视频播放时不断更新这个纹理。
+                // mapping:如何将图像应用到对象。默认为 UV贴图（THREE.UVMapping）类型，这里U,V 坐标用来应用映射，要求是单个纹理。 其他类型包括：立方体反射贴图（THREE.CubeReflectionMapping）, 用于立方体贴图的反射映射; 立方体折射贴图（THREE.CubeRefractionMapping）, 用于立方体贴图的折射映射; 以及球面反射贴图（THREE.SphericalReflectionMapping）, 用于球面映射。
+                // wrapS: 缺省为 THREE.ClampToEdgeWrapping, 表示边缘被夹到纹理单元（texels）的外边界。其他两个选项是 THREE.RepeatWrapping 和 THREE.MirroredRepeatWrapping。
+                // wrapT:缺省为 THREE.ClampToEdgeWrapping, 表示边缘被夹到纹理单元（texels）的外边界。其他两个选项是 THREE.RepeatWrapping 和 THREE.MirroredRepeatWrapping。
+                // magFilter:该属性定义当一个纹理单元（texel）覆盖多个像素点时纹理如何采样。缺省为 THREE.LinearFilter，表示获取4个最近的纹理单元执行双向线性插值计算。另外的选项是 THREE.NearestFilter, 表示使用最近的texel。
+                texture.wrapS=THREE.RepeatWrapping;
+                texture.wrapT=THREE.RepeatWrapping;
+                var planeMaterial = new THREE.MeshBasicMaterial( {
+                    map: texture
+                })
+                var planeGeometry = new THREE.PlaneBufferGeometry(1000, 200, 20, 20);
+                var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.receiveShadow = true;
+                plane.rotation.x = -0.5 * Math.PI;
+                plane.position.x = 15;
+                plane.position.y = 0;
+                plane.position.z = 0;
+                scene.add(plane);
+                console.log(scene);
+            },function (xhr) {
+                console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+            },function () {
+                console.log( 'An error happened' );
+            })
 
 
-        var planeGeometry = new THREE.PlaneGeometry(1000, 200, 20, 20);
-        var planeMaterial = new THREE.MeshLambertMaterial({map: textureGrass});
-//        var planeMaterial = new THREE.MeshLambertMaterial();
+        var planeGeometry = new THREE.PlaneBufferGeometry(1000, 200, 20, 20);
+        // var planeMaterial = new THREE.MeshLambertMaterial({map: textureGrass});
+        var planeMaterial = new THREE.MeshLambertMaterial();
         var plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.receiveShadow = true;
 
@@ -67,7 +98,7 @@
         plane.position.y = 0;
         plane.position.z = 0;
 
-        // add the plane to the scene
+        // // add the plane to the scene
         scene.add(plane);
 
         // create a cube
@@ -104,7 +135,7 @@
 //        camera.position.x = -120;
 //        camera.position.y = 165;
 //        camera.position.z = 145;
-        camera.lookAt(new THREE.Vector3(10, 0, 0));
+camera.lookAt(new THREE.Vector3(10, 0, 0));
 
 
         // add spotlight for a bit of light
@@ -124,24 +155,24 @@
 
         var pointColor = "#ffffff";
 //    var dirLight = new THREE.SpotLight( pointColor);
-        var dirLight = new THREE.DirectionalLight(pointColor);
-        dirLight.position.set(30, 10, -50);
-        dirLight.castShadow = true;
+var dirLight = new THREE.DirectionalLight(pointColor);
+dirLight.position.set(30, 10, -50);
+dirLight.castShadow = true;
 //        dirLight.shadowCameraNear = 0.1;
 //        dirLight.shadowCameraFar = 100;
 //        dirLight.shadowCameraFov = 50;
-        dirLight.target = plane;
-        dirLight.shadowCameraNear = 0.1;
-        dirLight.shadowCameraFar = 200;
-        dirLight.shadowCameraLeft = -50;
-        dirLight.shadowCameraRight = 50;
-        dirLight.shadowCameraTop = 50;
-        dirLight.shadowCameraBottom = -50;
-        dirLight.shadowMapWidth = 2048;
-        dirLight.shadowMapHeight = 2048;
+dirLight.target = plane;
+dirLight.shadowCameraNear = 0.1;
+dirLight.shadowCameraFar = 200;
+dirLight.shadowCameraLeft = -50;
+dirLight.shadowCameraRight = 50;
+dirLight.shadowCameraTop = 50;
+dirLight.shadowCameraBottom = -50;
+dirLight.shadowMapWidth = 2048;
+dirLight.shadowMapHeight = 2048;
 
 
-        scene.add(dirLight);
+scene.add(dirLight);
 
 
         // add the output of the renderer to the html element

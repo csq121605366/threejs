@@ -43,9 +43,9 @@
         // create a render and set the size
         var renderer = new THREE.WebGLRenderer();
 
-        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        renderer.setClearColor(new THREE.Color(0xEEEEEE));
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMapEnabled = true;
+        renderer.shadowMap.enabled = true;
 
         // create the ground plane
         var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
@@ -63,10 +63,11 @@
         scene.add(plane);
 
         // position and point the camera to the center of the scene
-        camera.position.x = -50;
+        camera.position.x = -40;
         camera.position.y = 30;
-        camera.position.z = 20;
+        camera.position.z = 40;
         camera.lookAt(new THREE.Vector3(-10, 0, 0));
+        // camera.lookAt(scene.position);
 
         // add subtle ambient lighting
         var ambientLight = new THREE.AmbientLight(0x090909);
