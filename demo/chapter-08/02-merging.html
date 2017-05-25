@@ -78,11 +78,17 @@
 
                 // add a large number of cubes
                 if (controls.combined) {
+                    // 创建组合对象
                     var geometry = new THREE.Geometry();
                     for (var i = 0; i < controls.numberOfObjects; i++) {
                         var cubeMesh = addcube();
+                        // 增加模型
+                        // 更新模型位置
                         cubeMesh.updateMatrix();
+                        // 合并几何模型。
                         geometry.merge(cubeMesh.geometry, cubeMesh.matrix);
+
+
                     }
                     scene.add(new THREE.Mesh(geometry, cubeMaterial));
 
@@ -95,7 +101,6 @@
 
 
             this.addCube = addcube;
-
             this.outputObjects = function () {
                 console.log(scene.children);
             }
@@ -105,6 +110,7 @@
 
         gui.add(controls, 'numberOfObjects', 0, 20000);
         gui.add(controls, 'combined').onChange(controls.redraw);
+        gui.add(controls, 'outputObjects');
         gui.add(controls, 'redraw');
 
 
@@ -116,12 +122,10 @@
 
         function addcube() {
 
-            var cubeSize = 1.0;
+            var cubeSize = 0.18;
             var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
 
             var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-            cube.castShadow = true;
-
             // position the cube randomly in the scene
             cube.position.x = -60 + Math.round((Math.random() * 100));
             cube.position.y = Math.round((Math.random() * 10));

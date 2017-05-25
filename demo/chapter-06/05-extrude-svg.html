@@ -8,6 +8,7 @@
 
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <!-- transformSVGPathExposed方法将svg path抛出 -->
     <script type="text/javascript" src="../libs/d3-threeD.js"></script>
     <script type="text/javascript" src="../libs/OrbitControls.js"></script>
     <style>
@@ -56,8 +57,10 @@
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-        webGLRenderer.shadowMapEnabled = true;
+        webGLRenderer.shadowMapEnabled = false;
 
+
+        // 可以通过ShapeGeometry绘制svg
         var shape = createMesh(new THREE.ShapeGeometry(drawShape()));
         // add the sphere to the scene
         scene.add(shape);
@@ -162,7 +165,7 @@
         function render() {
             stats.update();
 
-            shape.rotation.y = step += 0.005;
+            // shape.rotation.y = step += 0.005;
 
             orbit.update();
 

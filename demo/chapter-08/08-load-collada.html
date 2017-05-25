@@ -9,6 +9,7 @@
 
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
     <style>
         body {
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -19,17 +20,18 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
+        var orbit;
 
         var stats = initStats();
 
@@ -57,26 +59,44 @@
         spotLight.intensity = 2;
         scene.add(spotLight);
 
+        var directionalLight =new THREE.DirectionalLight(0x404040,1);
+        directionalLight.position.set( 0, 1, 0 );
+        scene.add(directionalLight )
+
         // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
+
+        orbit = new THREE.OrbitControls(camera, webGLRenderer.domElement);
 
         // model from http://www.thingiverse.com/thing:69709
         var loader = new THREE.ColladaLoader();
 
         var mesh;
         loader.load("../assets/models/dae/Truck_dae.dae", function (result) {
+
             mesh = result.scene.children[0].children[0].clone();
+            console.log(result);
+            console.log(mesh);
+            mesh.rotation.set( 0, 0, 0, 'XYZ' )
             mesh.scale.set(4, 4, 4);
+
             scene.add(mesh);
         });
 
 
         render();
 
-
+        var step = 0;
         function render() {
             stats.update();
             // render using requestAnimationFrame
+
+            if(mesh){
+               orbit.update();
+               mesh.rotation.y = step += 0.006;
+           }
+
+            // mesh.rotation.sety( 0, mesh.rotation.y+=Math.floor(Math.PI*0.2), 0, 'XYZ' )
             requestAnimationFrame(render);
             webGLRenderer.render(scene, camera);
         }

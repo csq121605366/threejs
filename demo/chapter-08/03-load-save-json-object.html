@@ -3,9 +3,10 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
     <title>Example 08.03 - Save & Load</title>
-    <script type="text/javascript" src="../libs/three.js"></script>
-
+    <!-- <script type="text/javascript" src="../libs/three.js"></script> -->
+    <script src="https://cdn.bootcss.com/three.js/r83/three.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -18,14 +19,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -40,9 +41,9 @@
 
         // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
-        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-        webGLRenderer.shadowMapEnabled = true;
+        webGLRenderer.shadowMapEnabled = false;
 
         var knot = createMesh(new THREE.TorusKnotGeometry(10, 1, 64, 8, 2, 3, 1));
         // add the sphere to the scene
@@ -71,16 +72,25 @@
             this.radius = knot.geometry.parameters.radius;
             this.tube = 0.3;
             this.radialSegments = knot.geometry.parameters.radialSegments;
+            console.log(this.radialSegments);
             this.tubularSegments = knot.geometry.parameters.tubularSegments;
             this.p = knot.geometry.parameters.p;
             this.q = knot.geometry.parameters.q;
-            this.heightScale = knot.geometry.parameters.heightScale;
+            this.tube = knot.geometry.parameters.tube;
 
             this.redraw = function () {
                 // remove the old plane
                 scene.remove(knot);
                 // create a new one
-                knot = createMesh(new THREE.TorusKnotGeometry(controls.radius, controls.tube, Math.round(controls.radialSegments), Math.round(controls.tubularSegments), Math.round(controls.p), Math.round(controls.q), controls.heightScale));
+                knot = createMesh(
+                    new THREE.TorusKnotGeometry(
+                        controls.radius, 
+                        controls.tube, 
+                        Math.round(controls.radialSegments), 
+                        Math.round(controls.tubularSegments), 
+                        Math.round(controls.p), 
+                        Math.round(controls.q), 
+                        controls.tube));
                 // add it to the scene.
                 scene.add(knot);
             };
@@ -99,7 +109,6 @@
                 if (json) {
                     var loadedGeometry = JSON.parse(json);
                     var loader = new THREE.ObjectLoader();
-
                     loadedMesh = loader.parse(loadedGeometry);
                     loadedMesh.position.x -= 50;
                     scene.add(loadedMesh);
@@ -108,17 +117,17 @@
         };
 
         var gui = new dat.GUI();
-        var ioGui = gui.addFolder('Save & Load');
+        var ioGui = gui.addFolder('加载和保存');
         ioGui.add(controls, 'save').onChange(controls.save);
         ioGui.add(controls, 'load').onChange(controls.load);
-        var meshGui = gui.addFolder('mesh');
+        var meshGui = gui.addFolder('网格');
         meshGui.add(controls, 'radius', 0, 40).onChange(controls.redraw);
         meshGui.add(controls, 'tube', 0, 40).onChange(controls.redraw);
-        meshGui.add(controls, 'radialSegments', 0, 400).step(1).onChange(controls.redraw);
+        meshGui.add(controls, 'radialSegments', 0, 40).step(1).onChange(controls.redraw);
         meshGui.add(controls, 'tubularSegments', 1, 20).step(1).onChange(controls.redraw);
         meshGui.add(controls, 'p', 1, 10).step(1).onChange(controls.redraw);
         meshGui.add(controls, 'q', 1, 15).step(1).onChange(controls.redraw);
-        meshGui.add(controls, 'heightScale', 0, 5).onChange(controls.redraw);
+        meshGui.add(controls, 'tube', 0, 5).onChange(controls.redraw);
 
 
         render();

@@ -40,11 +40,11 @@
 
         // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
-        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-        webGLRenderer.shadowMapEnabled = true;
+        webGLRenderer.shadowMapEnabled = false;
 
-        var plane = createMesh(new THREE.PlaneGeometry(10, 14, 4, 4));
+        var plane = createMesh(new THREE.PlaneBufferGeometry(10, 14, 4, 4));
         // add the sphere to the scene
         scene.add(plane);
 

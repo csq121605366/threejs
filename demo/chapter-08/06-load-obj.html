@@ -3,34 +3,40 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
     <title>Example 08.06 - Load OBJ model </title>
     <script type="text/javascript" src="../libs/three.js"></script>
     <script type="text/javascript" src="../libs/OBJLoader.js"></script>
 
+  <!--   <script src="https://cdn.bootcss.com/three.js/r83/three.js"></script>
+  <script type="text/javascript" src="../libs/loaders/OBJLoader.js"></script> -->
 
-    <script type="text/javascript" src="../libs/stats.js"></script>
-    <script type="text/javascript" src="../libs/dat.gui.js"></script>
-    <style>
-        body {
-            /* set margin to 0 and overflow to hidden, to go fullscreen */
-            margin: 0;
-            overflow: hidden;
-        }
-    </style>
+  <script type="text/javascript" src="../libs/stats.js"></script>
+  <script type="text/javascript" src="../libs/dat.gui.js"></script>
+
+  <script type="text/javascript" src="../libs/OrbitControls.js"></script>
+  <style>
+    body {
+        /* set margin to 0 and overflow to hidden, to go fullscreen */
+        margin: 0;
+        overflow: hidden;
+    }
+</style>
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
+        var orbit;
 
         var stats = initStats();
 
@@ -42,7 +48,7 @@
 
         // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
-        webGLRenderer.setClearColor(new THREE.Color(0xaaaaff, 1.0));
+        webGLRenderer.setClearColor(new THREE.Color(0xaaaaff));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
 
@@ -62,6 +68,9 @@
         // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
 
+
+        orbit = new THREE.OrbitControls(camera, webGLRenderer.domElement);
+
         // call the render function
         var step = 0;
 
@@ -77,15 +86,24 @@
         var mesh;
 
         var loader = new THREE.OBJLoader();
+
         loader.load('../assets/models/pinecone.obj', function (loadedMesh) {
-            var material = new THREE.MeshLambertMaterial({color: 0x5C3A21});
+            // var material = new THREE.MeshLambertMaterial({color: 0x5C3A21});
+            var material = new THREE.MeshLambertMaterial({color: 0xFDD172});
 
             // loadedMesh is a group of meshes. For
             // each mesh set the material, and compute the information
             // three.js needs for rendering.
+            // 
+         
             loadedMesh.children.forEach(function (child) {
                 child.material = material;
+                // 计算面法向量
                 child.geometry.computeFaceNormals();
+                // computeVertexNormals ( areaWeighted )
+                // areaWeighted 如果为true，则每个面法线对顶点法线的贡献由该面的面积所确定。默认为true。
+                // 通过平均面法线来计算顶点法线。
+                // 面法线必须已存在（预先计算好）。
                 child.geometry.computeVertexNormals();
             });
 
@@ -105,11 +123,11 @@
             if (mesh) {
                 mesh.rotation.y += 0.006;
                 mesh.rotation.x += 0.006;
-//                mesh.rotation.y+=0.006;
+                mesh.rotation.y += 0.006;
             }
+            orbit.update();
 
-
-            // render using requestAnimationFrame
+            // render using requestAnimationFrame 
             requestAnimationFrame(render);
             webGLRenderer.render(scene, camera);
         }

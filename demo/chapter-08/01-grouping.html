@@ -18,14 +18,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -40,7 +40,7 @@
 
         // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
-        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
 
@@ -50,15 +50,15 @@
         camera.position.x = 30;
         camera.position.y = 30;
         camera.position.z = 30;
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        camera.lookAt(scene.position);
 
         var ground = new THREE.PlaneGeometry(100, 100, 50, 50);
 
         var groundMesh = THREE.SceneUtils.createMultiMaterialObject(ground,
-                [new THREE.MeshBasicMaterial({wireframe: true, overdraw: true, color: 000000}),
-                    new THREE.MeshBasicMaterial({color: 0x00ff00, transparent: true, opacity: 0.5}
-                    )
-                ]);
+            [new THREE.MeshBasicMaterial({wireframe: false, overdraw: false, color: 0x99a000}),
+            new THREE.MeshBasicMaterial({color: 0xcccccc, transparent: true, opacity: 0.2}
+                )
+            ]);
         groundMesh.rotation.x = -0.5 * Math.PI;
         scene.add(groundMesh);
 
@@ -112,15 +112,24 @@
                 // add it to the scene.
 
                 // also create a group, only used for rotating
+                // 这与Object3D几乎相同。目的是使语法上更清晰的对象组进行工作。
+                // 其实创建group和创建object3D对象的效果一样但是创建group更语义化
+                // group = new THREE.Object3D();
                 group = new THREE.Group();
+                // 将生成的模型放进group对象中
                 group.add(sphere);
                 group.add(cube);
 
                 scene.add(group);
+
                 controls.positionBoundingBox();
 
-                var arrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), group.position, 10, 0x0000ff);
-                scene.add(arrow);
+                var arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), group.position, 100, 0x0000ff);
+                var arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), group.position, 100, 0x0000ff);
+                var arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), group.position, 100, 0x0000ff);
+                scene.add(arrowX);
+                scene.add(arrowY);
+                scene.add(arrowZ);
 
 
             };
@@ -139,7 +148,7 @@
                     wireframeLinewidth: 2,
                     wireframe: true
                 }));
-//            scene.add(bboxMesh);
+                //scene.add(bboxMesh);
 
                 bboxMesh.position.x = ((box.min.x + box.max.x) / 2);
                 bboxMesh.position.y = ((box.min.y + box.max.y) / 2);
@@ -258,16 +267,33 @@
 
         // http://jsfiddle.net/MREL4/
         function setFromObject(object) {
+            // 表示三维空间中的一个包围盒。
+            // Box3( min, max )
             var box = new THREE.Box3();
+            // 创建一个原点三位向量
             var v1 = new THREE.Vector3();
+            // 更新对象及其子对象的全局变换。
             object.updateMatrixWorld(true);
+            // 设置包围盒为空
             box.makeEmpty();
+            // console.log(object.lookAt(new THREE.Vector3(-100,-100,-100)));
+            // console.log(object);
+            // 遍历其子孙
             object.traverse(function (node) {
+                // console.log(node.geometry);
+                // console.log(node);
                 if (node.geometry !== undefined && node.geometry.vertices !== undefined) {
+                    // console.log(node);
                     var vertices = node.geometry.vertices;
                     for (var i = 0, il = vertices.length; i < il; i++) {
+                        // copy遍历对象的向量值
                         v1.copy(vertices[i]);
+                        // 将向量乘以一个Matrix4的4×3的子矩阵
+                        // 通过4x4矩阵将任何点变换到另一个点
+                        // matrixWorld:对象的全局变换。如果该Object3D没有父对象，那么它和局部变换相同。
                         v1.applyMatrix4(node.matrixWorld);
+                        // expandByPoint ( point ) this
+                        // 扩展这个框的边界来包括这个点（point）。
                         box.expandByPoint(v1);
                     }
                 }

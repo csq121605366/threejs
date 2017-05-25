@@ -12,6 +12,9 @@
     <script type="text/javascript" src="../assets/fonts/helvetiker_bold.typeface.js"></script>
     <script type="text/javascript" src="../assets/fonts/bitstream_vera_sans_mono_roman.typeface.js"></script>
 
+
+    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
+
     <style>
         body {
             /* set margin to 0 and overflow to hidden, to go fullscreen */
@@ -22,18 +25,19 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
 
+        var orbit;
         var stats = initStats();
 
         // create a scene, that will hold all our elements such as objects, cameras and lights.
@@ -66,6 +70,8 @@
         // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
 
+        orbit = new THREE.OrbitControls(camera, webGLRenderer.domElement);
+
         // call the render function
         var step = 0;
 
@@ -86,7 +92,7 @@
             this.steps = 1;
             this.font = "helvetiker";
             this.weight = "normal";
-//            this.style = "italics";
+
 
             this.asGeom = function () {
                 // remove the old plane
@@ -109,13 +115,18 @@
 
                 console.log(THREE.FontUtils.faces);
 
-                text1 = createMesh(new THREE.TextGeometry("Learning", options));
+                text1 = createMesh(new THREE.TextGeometry("csq", options));
                 text1.position.z = -100;
                 text1.position.y = 100;
                 scene.add(text1);
 
-                text2 = createMesh(new THREE.TextGeometry("Three.js", options));
+                text2 = createMesh(new THREE.TextGeometry("csq", options));
                 scene.add(text2);
+
+                text3 = createMesh(new THREE.TextGeometry("csq", options));
+                text3.position.z = 100;
+                text3.position.y = 200;
+                scene.add(text3);
             };
 
         };
@@ -139,13 +150,11 @@
 
         function createMesh(geom) {
 
-            // assign two materials
-//            var meshMaterial = new THREE.MeshLambertMaterial({color: 0xff5555});
-//            var meshMaterial = new THREE.MeshNormalMaterial();
+
             var meshMaterial = new THREE.MeshPhongMaterial({
                 specular: 0xffffff,
                 color: 0xeeffff,
-                shininess: 100,
+                shininess: 4000,
                 metal: true
             });
 //            meshMaterial.side=THREE.DoubleSide;
@@ -157,6 +166,8 @@
 
         function render() {
             stats.update();
+
+            orbit.update();
             requestAnimationFrame(render);
             webGLRenderer.render(scene, camera);
         }

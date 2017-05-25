@@ -18,14 +18,14 @@
 </head>
 <body>
 
-<div id="Stats-output">
-</div>
-<!-- Div which will hold the Output -->
-<div id="WebGL-output">
-</div>
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
 
-<!-- Javascript code that runs our Three.js examples -->
-<script type="text/javascript">
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
 
     // once everything is loaded, we run our Three.js stuff.
     function init() {
@@ -40,7 +40,8 @@
 
         // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
-        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        webGLRenderer.setClearColor();
+        webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
 
@@ -54,11 +55,22 @@
         camera.position.z = 40;
         camera.lookAt(new THREE.Vector3(10, 0, 0));
 
+        var planeGeometry=new THREE.PlaneGeometry(60,40,1,1);
+        var planeMaterial=new THREE.MeshBasicMaterial({
+            color:0x999999
+        });
+        var plane=new THREE.Mesh( planeGeometry, planeMaterial);
+        plane.receiveShadow = true;
+        plane.rotation.x=-Math.PI/2;
+        scene.add(plane);
 
         // add spotlight for the shadows
         var spotLight = new THREE.SpotLight(0xffffff);
-        spotLight.position.set(-40, 60, -10);
+        spotLight.position.set(0, 10, 0);
         scene.add(spotLight);
+        var spotLightHelper = new THREE.SpotLightHelper( spotLight );
+        scene.add( spotLightHelper );
+        console.log(spotLightHelper);
 
         // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
@@ -78,6 +90,7 @@
             this.thetaStart = 0.3 * Math.PI * 2;
             this.thetaLength = 0.3 * Math.PI * 2;
             this.segments = 10;
+            this.rotate=0.1;
 
             this.redraw = function () {
                 // remove the old plane
@@ -90,11 +103,12 @@
         };
 
         var gui = new dat.GUI();
+        gui.add(controls, 'rotate', 0, 0.3);
         gui.add(controls, 'radius', 0, 40).onChange(controls.redraw);
         gui.add(controls, 'segments', 0, 40).onChange(controls.redraw);
         gui.add(controls, 'thetaStart', 0, 2 * Math.PI).onChange(controls.redraw);
         gui.add(controls, 'thetaLength', 0, 2 * Math.PI).onChange(controls.redraw);
-        render();
+        
 
         function createMesh(geom) {
 
@@ -106,15 +120,16 @@
 
             // create a multimaterial
             var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
-
+            mesh.rotation.x=-Math.PI/2;
 
             return mesh;
         }
 
+        render();
         function render() {
             stats.update();
 
-            circle.rotation.y = step += 0.01;
+            circle.rotation.y = step += controls.rotate;
 
             // render using requestAnimationFrame
             requestAnimationFrame(render);
