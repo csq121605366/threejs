@@ -52,9 +52,9 @@
 
 
             // add spotlight for the shadows
-            var spotLight = new THREE.DirectionalLight(0xffffff);
+            var spotLight = new THREE.DirectionalLight(0xaaaaaa);
             spotLight.position.set(300, 200, 300);
-            spotLight.intensity = 1;
+            spotLight.intensity = 0.8;
             scene.add(spotLight);
 
             // add the output of the renderer to the html element
@@ -62,61 +62,93 @@
 
             // call the render function
             var step = 0;
-
+            var duration = 0;
 
             // setup the control gui
             var controls = new function() {
                 this.keyframe = 0;
+                this.duration = 1000;
             };
 
             var gui = new dat.GUI();
             gui.add(controls, "keyframe", 0, 15).step(1).onChange(function(e) {
                 showFrame(e);
             });
+            gui.add(controls, "duration", 100, 2000).step(10);
+
+            // 网格
             var mesh;
+            // 网格动画
             var meshAnim;
+            // 帧数组
             var frames = [];
+            // 当前网格
             var currentMesh;
+            // 动画时钟
             var clock = new THREE.Clock();
 
             var loader = new THREE.JSONLoader();
+            var mat, mat2;
             loader.load('../assets/models/horse.js', function(geometry, mat) {
 
-                var mat = new THREE.MeshLambertMaterial({
-                    morphTargets: true,
-                    vertexColors: THREE.FaceColors
+                // 自动动画
+                mat = new THREE.MeshLambertMaterial({
+                    morphTargets: true, //定义材料是否使用 morphTargets。默认值是 false。
+                    vertexColors: THREE.FaceColors,
+                    emissive: new THREE.Color(0xD84C29)
                 });
+                // THREE.NoColors：顶点没有颜色
+                // THREE.FaceColors：顶点使用面的颜色
+                // THREE.VertexColors：顶点使用顶点的颜色。
+                // mat.opacity = 0.1;
 
-
-                var mat2 = new THREE.MeshLambertMaterial({
+                // 手动动画
+                mat2 = new THREE.MeshLambertMaterial({
                     color: 0xffffff,
-                    vertexColors: THREE.FaceColors
+                    morphTargets: false,
+                    vertexColors: THREE.FaceColors,
+                    emissive: new THREE.Color('green')
                 });
 
-                mesh = new THREE.Mesh(geometry, mat);
+                // 手动对象
+                mesh = new THREE.Mesh(geometry, mat2);
                 mesh.position.x = -100;
                 frames.push(mesh);
                 currentMesh = mesh;
+
                 morphColorsToFaceColors(geometry);
 
                 mesh.geometry.morphTargets.forEach(function(e) {
                     var geom = new THREE.Geometry();
+                    // vertices顶点
+                    // 设置点和面
                     geom.vertices = e.vertices;
                     geom.faces = geometry.faces;
-
-
+                    // 设置手动对象的网格
                     var morpMesh = new THREE.Mesh(geom, mat2);
+                    // 推到帧数组中
                     frames.push(morpMesh);
+                    // 为了防止移位，把该对象位置设置和初始化的一样
                     morpMesh.position.x = -100;
 
                 });
 
+                // computeVertexNormals( areaWeighted )
+                // areaWeighted - 如果为true，则每个面法线对顶点法线的贡献由该面的面积所确定。默认为true。通过平均面法线来计算顶点法线。面法线必须已存在（预先计算好）。
                 geometry.computeVertexNormals();
+                // computeFaceNormals()计算面法向量。
                 geometry.computeFaceNormals();
+                // computeMorphNormals()计算变形法线。
                 geometry.computeMorphNormals();
 
+
+                // 可以混合多个动画变形目标的网格。
+                // MorphBlendMesh(geometry, material)
+                // geometry — An instance of 几何模型(Geometry).
+                // material — An instance of 材料(Material) (optional).
                 meshAnim = new THREE.MorphAnimMesh(geometry, mat);
-                meshAnim.duration = 1000;
+
+                meshAnim.duration = 600;
                 meshAnim.position.x = 200;
                 meshAnim.position.z = 0;
 
@@ -130,23 +162,21 @@
                 scene.remove(currentMesh);
                 scene.add(frames[e]);
                 currentMesh = frames[e];
-                console.log(currentMesh);
             }
 
             function morphColorsToFaceColors(geometry) {
-
                 if (geometry.morphColors && geometry.morphColors.length) {
-
                     var colorMap = geometry.morphColors[0];
                     for (var i = 0; i < colorMap.colors.length; i++) {
                         geometry.faces[i].color = colorMap.colors[i];
-                        geometry.faces[i].color.offsetHSL(0, 0.3, 0);
+                        geometry.faces[i].color.offsetHSL(0, 0.1, 0);
                     }
                 }
             }
 
 
             render();
+
 
 
             function render() {
@@ -157,9 +187,9 @@
                 if (meshAnim) {
                     meshAnim.updateAnimation(delta * 1000);
                     meshAnim.rotation.y += 0.01;
+                    meshAnim.duration = controls.duration;
                 }
                 // render using requestAnimationFrame
-
 
                 requestAnimationFrame(render);
                 webGLRenderer.render(scene, camera);
