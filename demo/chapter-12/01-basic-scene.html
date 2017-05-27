@@ -21,7 +21,6 @@
 
 
     <script type="text/javascript">
-
         'use strict';
 
         var scale = chroma.scale(['green', 'white']);
@@ -30,15 +29,17 @@
         Physijs.scripts.ammo = '../libs/ammo.js';
 
         var initScene, render, applyForce, setMousePosition, mouse_position,
-                ground_material, box_material,
-                renderer, render_stats, scene, ground, light, camera, box, boxes = [];
+            ground_material, box_material,
+            renderer, render_stats, scene, ground, light, camera, box, boxes = [];
 
-        initScene = function () {
+        initScene = function() {
 
-            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer = new THREE.WebGLRenderer({
+                antialias: true //antialias抗锯齿
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
 
-            renderer.setClearColor(new THREE.Color(0x000000));
+            renderer.setClearColor(new THREE.Color(0xF0F0F0));
             document.getElementById('viewport').appendChild(renderer.domElement);
 
             render_stats = new Stats();
@@ -47,25 +48,25 @@
             render_stats.domElement.style.zIndex = 100;
             document.getElementById('viewport').appendChild(render_stats.domElement);
 
+            // physijs在three.js的普通场景外创建场景
             scene = new Physijs.Scene;
+            // 增加引力
             scene.setGravity(new THREE.Vector3(0, -50, 0));
 
-            camera = new THREE.PerspectiveCamera(
-                    35,
-                    window.innerWidth / window.innerHeight,
-                    1,
-                    1000
-            );
-            camera.position.set(50, 30, 50);
-            camera.lookAt(new THREE.Vector3(10, 0, 10));
+            camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.set(0, 40, 60);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
             scene.add(camera);
 
             // Light
             light = new THREE.SpotLight(0xFFFFFF);
             light.position.set(20, 100, 50);
-
-
             scene.add(light);
+
+            // 增加环境灯光
+
+
+
 
             createGround();
 
@@ -75,35 +76,35 @@
 
             requestAnimationFrame(render);
 
-            var controls = new function () {
+            var controls = new function() {
                 this.gravityX = 0;
                 this.gravityY = -50;
                 this.gravityZ = 0;
 
 
-                this.resetScene = function () {
+                this.resetScene = function() {
 
                     scene.setGravity(new THREE.Vector3(controls.gravityX, controls.gravityY, controls.gravityZ));
-                    stones.forEach(function (st) {
+                    stones.forEach(function(st) {
                         scene.remove(st)
                     });
                     stones = [];
 
 
-                    points.forEach(function (point) {
-                        var stoneGeom = new THREE.BoxGeometry(0.6, 6, 2);
+                    points.forEach(function(point) {
+                        var stoneGeom = new THREE.BoxGeometry(0.6, 6.4, 2);
 
-                        var stone = new Physijs.BoxMesh(stoneGeom, Physijs.createMaterial(new THREE.MeshPhongMaterial(
-                                {
-                                    color: scale(Math.random()).hex(),
-                                    transparent: true, opacity: 0.8,
-//                            map: THREE.ImageUtils.loadTexture( '../assets/textures/general/darker_wood.jpg' )
-                                })));
-                        console.log(stone.position);
+                        var stone = new Physijs.BoxMesh(stoneGeom, Physijs.createMaterial(new THREE
+                            .MeshPhongMaterial({
+                                color: scale(Math.random()).hex(),
+                                transparent: true,
+                                opacity: 0.7,
+                                // map: THREE.ImageUtils.loadTexture('../assets/textures/general/darker_wood.jpg')
+                            })));
                         stone.position.copy(point);
                         stone.lookAt(scene.position);
                         stone.__dirtyRotation = true;
-                        stone.position.y = 3.5;
+                        stone.position.y = 3.6;
 
                         scene.add(stone);
                         stones.push(stone);
@@ -111,7 +112,7 @@
                     });
 
                     // let the first one fall down
-                    stones[0].rotation.x = 0.2;
+                    stones[0].rotation.x = 0.4;
                     stones[0].__dirtyRotation = true;
 
                 };
@@ -128,7 +129,7 @@
 
         var stepX;
 
-        render = function () {
+        render = function() {
             requestAnimationFrame(render);
             renderer.render(scene, camera);
             render_stats.update();
@@ -161,43 +162,46 @@
         }
 
         function createGround() {
-            var ground_material = Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({map: THREE.ImageUtils.loadTexture('../assets/textures/general/wood-2.jpg')}),
-                    .9, .3);
+            var ground_loader = new THREE.TextureLoader();
+            ground_loader.load('../assets/textures/general/wood-2.jpg', function(texture) {
+                var ground_material = Physijs.createMaterial(
+                    new THREE.MeshPhongMaterial({
+                        map: texture
+                    }),
+                    10, 0.3);
+                var ground = new Physijs.BoxMesh(new THREE.BoxGeometry(60, 1, 60), ground_material, 0);
 
-            var ground = new Physijs.BoxMesh(new THREE.BoxGeometry(60, 1, 60), ground_material, 0);
+                var borderLeft = new Physijs.BoxMesh(new THREE.BoxGeometry(2, 3, 60), ground_material, 0);
+                borderLeft.position.x = -31;
+                borderLeft.position.y = 2;
+                ground.add(borderLeft);
 
-            var borderLeft = new Physijs.BoxMesh(new THREE.BoxGeometry(2, 3, 60), ground_material, 0);
-            borderLeft.position.x = -31;
-            borderLeft.position.y = 2;
-            ground.add(borderLeft);
+                var borderRight = new Physijs.BoxMesh(new THREE.BoxGeometry(2, 3, 60), ground_material, 0);
+                borderRight.position.x = 31;
+                borderRight.position.y = 2;
+                ground.add(borderRight);
 
-            var borderRight = new Physijs.BoxMesh(new THREE.BoxGeometry(2, 3, 60), ground_material, 0);
-            borderRight.position.x = 31;
-            borderRight.position.y = 2;
-            ground.add(borderRight);
+                var borderBottom = new Physijs.BoxMesh(new THREE.BoxGeometry(64, 3, 2), ground_material, 0);
+                borderBottom.position.z = 30;
+                borderBottom.position.y = 2;
+                ground.add(borderBottom);
 
-            var borderBottom = new Physijs.BoxMesh(new THREE.BoxGeometry(64, 3, 2), ground_material, 0);
-            borderBottom.position.z = 30;
-            borderBottom.position.y = 2;
-            ground.add(borderBottom);
+                var borderTop = new Physijs.BoxMesh(new THREE.BoxGeometry(64, 3, 2), ground_material, 0);
+                borderTop.position.z = -30;
+                borderTop.position.y = 2;
+                ground.add(borderTop);
 
-            var borderTop = new Physijs.BoxMesh(new THREE.BoxGeometry(64, 3, 2), ground_material, 0);
-            borderTop.position.z = -30;
-            borderTop.position.y = 2;
-            ground.add(borderTop);
-
-            scene.add(ground);
+                scene.add(ground);
+            })
         }
 
 
         window.onload = initScene;
-
     </script>
 </head>
 
 <body>
-<div id="viewport"></div>
+    <div id="viewport"></div>
 </body>
 
 </html>

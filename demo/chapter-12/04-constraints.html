@@ -14,33 +14,38 @@
 
     <title>Physijs Constraints</title>
 
-    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/three.86dev.js"></script>
+    <script type="text/javascript" src="../libs/Projector.js"></script>
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/physi.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../libs/chroma.js"></script>
 
     <script type="text/javascript">
-
         'use strict';
-
+        // 指向我们想要执行的任务线程
         Physijs.scripts.worker = '../libs/physijs_worker.js';
+        // 指向内部使用的ammo.js库
         Physijs.scripts.ammo = '../libs/ammo.js';
-
+        // 创建随机颜色
         var scale = chroma.scale(['white', 'blue', 'red', 'yellow']);
 
         var initScene, render, applyForce, setMousePosition, mouse_position,
-                ground_material, box_material,
-                projector, renderer, render_stats, physics_stats, scene, ground, light, camera, box, boxes = [];
+            ground_material, box_material,
+            projector, renderer, render_stats, physics_stats, scene, ground, light, camera, box, boxes = [];
 
-        initScene = function () {
+        initScene = function() {
             projector = new THREE.Projector;
-
-            renderer = new THREE.WebGLRenderer({antialias: true});
+            // 创建渲染器
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            // 设置渲染器尺寸
             renderer.setSize(window.innerWidth, window.innerHeight);
-
-            renderer.setClearColor(new THREE.Color(0x000000));
-            renderer.shadowMapEnabled = true;
+            // 设置渲染器颜色
+            renderer.setClearColor(new THREE.Color(0xaeaeae));
+            // 渲染器渲染阴影
+            renderer.shadowMap.enabled = true;
 
 
             document.getElementById('viewport').appendChild(renderer.domElement);
@@ -52,36 +57,45 @@
             render_stats.domElement.style.zIndex = 100;
             document.getElementById('viewport').appendChild(render_stats.domElement);
 
-
-            scene = new Physijs.Scene({reportSize: 10, fixedTimeStep: 1 / 60});
-
+            // 创建一个应用了物理效果的场景
+            scene = new Physijs.Scene({
+                reportSize: 10,
+                fixedTimeStep: 1 / 60
+            });
+            // 设置重力效果
             scene.setGravity(new THREE.Vector3(0, -10, 0));
-
+            // 设置相机
             camera = new THREE.PerspectiveCamera(
-                    35,
-                    window.innerWidth / window.innerHeight,
-                    1,
-                    1000
+                35,
+                window.innerWidth / window.innerHeight,
+                1,
+                1000
             );
-            camera.position.set(85, 65, 65);
+            // 相机位置
+            camera.position.set(0, 80, 80);
+            // 相机看的视角
             camera.lookAt(new THREE.Vector3(0, 0, 0));
+            // 将相机添加到场景中
             scene.add(camera);
-
             // Light
+            // 增加灯光
             light = new THREE.SpotLight(0xFFFFFF);
+            // 灯光位置
             light.position.set(20, 50, 50);
+            // 灯光是否投射阴影
             light.castShadow = true;
+
             light.shadowMapDebug = true;
-            light.shadowCameraNear = 10;
-            light.shadowCameraFar = 100;
-
-
+            light.shadow.camera.near = 10;
+            light.shadow.camera.far = 100;
             scene.add(light);
 
 
+            // 创建临时网格数组
             var meshes = [];
-
+            // 创建地面
             createGround();
+
             var flipperLeftConstraint = createLeftFlipper();
             var flipperRightConstraint = createRightFlipper();
             var sliderBottomConstraint = createSliderBottom();
@@ -91,7 +105,7 @@
             var point2point = createPointToPoint(true);
 
 
-            var controls = new function () {
+            var controls = new function() {
                 this.enableMotor = false;
                 this.acceleration = 2;
                 this.velocity = -10;
@@ -101,7 +115,7 @@
                 this.motorTargetY = 0;
                 this.motorTargetZ = 0;
 
-                this.updateCone = function () {
+                this.updateCone = function() {
                     if (controls.enableConeTwistMotor) {
                         coneTwistConstraint.enableMotor();
                         coneTwistConstraint.setMotorTarget(new THREE.Vector3(controls.motorTargetX, controls.motorTargetY, controls.motorTargetZ));
@@ -111,7 +125,7 @@
 
                 };
 
-                this.updateMotor = function () {
+                this.updateMotor = function() {
                     if (controls.enableMotor) {
                         // velocity is the velocity we are going for.
                         // acceleration is how fast we're going to reach it
@@ -125,51 +139,49 @@
                     }
                 };
 
-                this.sliderLeft = function () {
+                this.sliderLeft = function() {
                     sliderBottomConstraint.disableLinearMotor();
                     sliderBottomConstraint.enableLinearMotor(controls.velocity, controls.acceleration);
                     sliderTopConstraint.disableLinearMotor();
                     sliderTopConstraint.enableLinearMotor(controls.velocity, controls.acceleration);
                 };
 
-                this.sliderRight = function () {
+                this.sliderRight = function() {
                     sliderBottomConstraint.disableLinearMotor();
                     sliderBottomConstraint.enableLinearMotor(-1 * controls.velocity, controls.acceleration);
                     sliderTopConstraint.disableLinearMotor();
                     sliderTopConstraint.enableLinearMotor(-1 * controls.velocity, controls.acceleration);
                 };
 
-                this.clearMeshes = function () {
-                    meshes.forEach(function (e) {
+                this.clearMeshes = function() {
+                    meshes.forEach(function(e) {
                         scene.remove(e);
                     });
                     meshes = [];
                 };
 
-                this.addSpheres = function () {
+                this.addSpheres = function() {
                     var colorSphere = scale(Math.random()).hex();
                     for (var i = 0; i < 5; i++) {
 
                         box = new Physijs.SphereMesh(
-                                new THREE.SphereGeometry(2, 20),
-                                Physijs.createMaterial(
-                                        new THREE.MeshPhongMaterial(
-                                                {
-                                                    color: colorSphere,
-                                                    opacity: 0.8,
-                                                    transparent: true
-//                                                        map: THREE.ImageUtils.loadTexture( '../assets/textures/general/floor-wood.jpg' )
-                                                }),
-                                        controls.sphereFriction,
-                                        controls.sphereRestitution
-                                )
-                                , 0.1);
+                            new THREE.SphereGeometry(2, 20),
+                            Physijs.createMaterial(
+                                new THREE.MeshPhongMaterial({
+                                    color: colorSphere,
+                                    opacity: 0.8,
+                                    transparent: true
+                                        //                                                        map: THREE.ImageUtils.loadTexture( '../assets/textures/general/floor-wood.jpg' )
+                                }),
+                                controls.sphereFriction,
+                                controls.sphereRestitution
+                            ), 0.1);
                         box.castShadow = true;
                         box.receiveShadow = true;
                         box.position.set(
-                                Math.random() * 50 - 25,
-                                20 + Math.random() * 5,
-                                Math.random() * 5
+                            Math.random() * 50 - 25,
+                            20 + Math.random() * 5,
+                            Math.random() * 5
                         );
                         meshes.push(box);
                         scene.add(box);
@@ -211,77 +223,78 @@
         };
 
         function createGround() {
-            // Materials
-            ground_material = Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial(
-                            {
-//                                color: 0xaaaaaa,
-                                map: THREE.ImageUtils.loadTexture('../assets/textures/general/floor-wood.jpg')
-                            }),
+            var loader = new THREE.TextureLoader();
+            loader.load('../assets/textures/general/floor-wood.jpg', function(mater) {
+                // Materials
+                ground_material = Physijs.createMaterial(
+                    new THREE.MeshPhongMaterial({
+                        color: 0xaaaaaa,
+                        map: mater
+                    }),
                     .9, // high friction
                     .7 // low restitution
-            );
+                );
 
-            // Ground
-            ground = new Physijs.BoxMesh(
+                // Ground
+                ground = new Physijs.BoxMesh(
                     new THREE.BoxGeometry(60, 1, 65),
                     ground_material,
                     0 // mass
-            );
+                );
 
-            ground.receiveShadow = true;
+                ground.receiveShadow = true;
 
 
-            var borderLeft = new Physijs.BoxMesh(
+                var borderLeft = new Physijs.BoxMesh(
                     new THREE.BoxGeometry(2, 6, 65),
                     ground_material,
                     0 // mass
-            );
+                );
+                borderLeft.position.x = -31;
+                borderLeft.position.y = 2;
+                borderLeft.receiveShadow = true;
 
-            borderLeft.position.x = -31;
-            borderLeft.position.y = 2;
-            borderLeft.receiveShadow = true;
 
+                ground.add(borderLeft);
 
-            ground.add(borderLeft);
-
-            var borderRight = new Physijs.BoxMesh(new THREE.BoxGeometry(2, 6, 65),
+                var borderRight = new Physijs.BoxMesh(new THREE.BoxGeometry(2, 6, 65),
                     ground_material,
                     0 // mass
-            );
-            borderRight.position.x = 31;
-            borderRight.position.y = 2;
-            borderRight.receiveShadow = true;
+                );
+                borderRight.position.x = 31;
+                borderRight.position.y = 2;
+                borderRight.receiveShadow = true;
 
-            ground.add(borderRight);
+                ground.add(borderRight);
 
 
-            var borderBottom = new Physijs.BoxMesh(
+                var borderBottom = new Physijs.BoxMesh(
                     new THREE.BoxGeometry(64, 6, 2),
                     ground_material,
                     0 // mass
-            );
+                );
 
-            borderBottom.position.z = 32;
-            borderBottom.position.y = 1.5;
-            borderBottom.receiveShadow = true;
-            ground.add(borderBottom);
+                borderBottom.position.z = 32;
+                borderBottom.position.y = 1.5;
+                borderBottom.receiveShadow = true;
+                ground.add(borderBottom);
 
-            var borderTop = new Physijs.BoxMesh(
+                var borderTop = new Physijs.BoxMesh(
                     new THREE.BoxGeometry(64, 6, 2),
                     ground_material,
                     0 // mass
-            );
+                );
 
-            borderTop.position.z = -32;
-            borderTop.position.y = 2;
-            borderTop.receiveShadow = true;
+                borderTop.position.z = -32;
+                borderTop.position.y = 2;
+                borderTop.receiveShadow = true;
 
-            ground.add(borderTop);
+                ground.add(borderTop);
 
-            ground.receiveShadow = true;
+                ground.receiveShadow = true;
 
-            scene.add(ground);
+                scene.add(ground);
+            })
         }
 
         function createConeTwist() {
@@ -289,7 +302,11 @@
             var armMesh = new THREE.BoxGeometry(2, 12, 3);
 
             var objectOne = new Physijs.BoxMesh(baseMesh, Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({color: 0x4444ff, transparent: true, opacity: 0.7}), 0, 0), 0);
+                new THREE.MeshPhongMaterial({
+                    color: 0x4444ff,
+                    transparent: true,
+                    opacity: 0.7
+                }), 0, 0), 0);
             objectOne.position.z = 0;
             objectOne.position.x = 20;
             objectOne.position.y = 15.5;
@@ -298,7 +315,11 @@
 
 
             var objectTwo = new Physijs.SphereMesh(armMesh, Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({color: 0x4444ff, transparent: true, opacity: 0.7}), 0, 0), 10);
+                new THREE.MeshPhongMaterial({
+                    color: 0x4444ff,
+                    transparent: true,
+                    opacity: 0.7
+                }), 0, 0), 10);
             objectTwo.position.z = 0;
             objectTwo.position.x = 20;
             objectTwo.position.y = 7.5;
@@ -323,7 +344,11 @@
             var obj2 = new THREE.SphereGeometry(2);
 
             var objectOne = new Physijs.SphereMesh(obj1, Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({color: 0xff4444, transparent: true, opacity: 0.7}), 0, 0));
+                new THREE.MeshPhongMaterial({
+                    color: 0xff4444,
+                    transparent: true,
+                    opacity: 0.7
+                }), 0, 0));
             objectOne.position.z = -18;
             objectOne.position.x = -10;
             objectOne.position.y = 2;
@@ -331,7 +356,11 @@
             scene.add(objectOne);
 
             var objectTwo = new Physijs.SphereMesh(obj2, Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({color: 0xff4444, transparent: true, opacity: 0.7}), 0, 0));
+                new THREE.MeshPhongMaterial({
+                    color: 0xff4444,
+                    transparent: true,
+                    opacity: 0.7
+                }), 0, 0));
             objectTwo.position.z = -5;
             objectTwo.position.x = -20;
             objectTwo.position.y = 2;
@@ -348,7 +377,11 @@
 
 
             var sliderMesh = new Physijs.BoxMesh(sliderCube, Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({color: 0x44ff44, opacity: 0.6, transparent: true}), 0, 0), 0.01);
+                new THREE.MeshPhongMaterial({
+                    color: 0x44ff44,
+                    opacity: 0.6,
+                    transparent: true
+                }), 0, 0), 0.01);
             sliderMesh.position.z = 20;
             sliderMesh.position.x = 6;
             sliderMesh.position.y = 1.5;
@@ -370,7 +403,11 @@
 
 
             var sliderMesh = new Physijs.BoxMesh(sliderSphere, Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({color: 0x44ff44, transparent: true, opacity: 0.5}), 0, 0), 10);
+                new THREE.MeshPhongMaterial({
+                    color: 0x44ff44,
+                    transparent: true,
+                    opacity: 0.5
+                }), 0, 0), 10);
             sliderMesh.position.z = -15;
             sliderMesh.position.x = -20;
             sliderMesh.position.y = 1.5;
@@ -388,18 +425,20 @@
         }
 
         function createLeftFlipper() {
+            // 生成长方形
             var flipperLeft = new Physijs.BoxMesh(
-                    new THREE.BoxGeometry(12, 2, 2), Physijs.createMaterial(new THREE.MeshPhongMaterial(
-                            {opacity: 0.6, transparent: true}
-                    )), 0.3
+                new THREE.BoxGeometry(8, 2, 2), Physijs.createMaterial(new THREE.MeshPhongMaterial({
+                    opacity: 1,
+                    transparent: true
+                })), 0.3
             );
             flipperLeft.position.x = -6;
             flipperLeft.position.y = 2;
             flipperLeft.position.z = 0;
             flipperLeft.castShadow = true;
             scene.add(flipperLeft);
-            var flipperLeftPivot = new Physijs.SphereMesh(
-                    new THREE.BoxGeometry(1, 1, 1), ground_material, 0);
+
+            var flipperLeftPivot = new Physijs.SphereMesh(new THREE.BoxGeometry(1, 1, 1), ground_material, 0);
 
             flipperLeftPivot.position.y = 1;
             flipperLeftPivot.position.x = -15;
@@ -413,13 +452,13 @@
             // so as long as that one is the same as the scene, no problems
             // rotation and axis are relative to object2. If position == cube2.position it works as expected
             var constraint = new Physijs.HingeConstraint(flipperLeft, flipperLeftPivot, flipperLeftPivot.position, new THREE.Vector3(0, 1, 0));
+            console.log(Physijs)
             scene.addConstraint(constraint);
 
-            constraint.setLimits(
-                    -2.2, // minimum angle of motion, in radians, from the point object 1 starts (going back)
-                    -0.6, // maximum angle of motion, in radians, from the point object 1 starts (going forward)
-                    0.1, // applied as a factor to constraint error, how big the kantelpunt is moved when a constraint is hit
-                    0 // controls bounce at limit (0.0 == no bounce)
+            constraint.setLimits(-2.2, // minimum angle of motion, in radians, from the point object 1 starts (going back)
+                -0.6, // maximum angle of motion, in radians, from the point object 1 starts (going forward)
+                0.1, // applied as a factor to constraint error, how big the kantelpunt is moved when a constraint is hit
+                0 // controls bounce at limit (0.0 == no bounce)
             );
 
             return constraint;
@@ -427,9 +466,10 @@
 
         function createRightFlipper() {
             var flipperright = new Physijs.BoxMesh(
-                    new THREE.BoxGeometry(12, 2, 2), Physijs.createMaterial(new THREE.MeshPhongMaterial(
-                            {opacity: 0.6, transparent: true}
-                    )), 0.3
+                new THREE.BoxGeometry(8, 2, 2), Physijs.createMaterial(new THREE.MeshPhongMaterial({
+                    opacity: 1,
+                    transparent: true
+                })), 0.3
             );
             flipperright.position.x = 8;
             flipperright.position.y = 2;
@@ -437,7 +477,7 @@
             flipperright.castShadow = true;
             scene.add(flipperright);
             var flipperLeftPivot = new Physijs.SphereMesh(
-                    new THREE.BoxGeometry(1, 1, 1), ground_material, 0);
+                new THREE.BoxGeometry(1, 1, 1), ground_material, 0);
 
             flipperLeftPivot.position.y = 2;
             flipperLeftPivot.position.x = 15;
@@ -451,14 +491,13 @@
             // so as long as that one is the same as the scene, no problems
             // rotation and axis are relative to object2. If position == cube2.position it works as expected
             var constraint = new Physijs.HingeConstraint(flipperright, flipperLeftPivot, flipperLeftPivot.position, new THREE.Vector3(0, 1, 0));
-//            var constraint = new Physijs.HingeConstraint(cube1, new THREE.Vector3(0,0,0), new THREE.Vector3(0,1,0));
+            //            var constraint = new Physijs.HingeConstraint(cube1, new THREE.Vector3(0,0,0), new THREE.Vector3(0,1,0));
             scene.addConstraint(constraint);
 
-            constraint.setLimits(
-                    -2.2, // minimum angle of motion, in radians, from the point object 1 starts (going back)
-                    -0.6, // maximum angle of motion, in radians, from the point object 1 starts (going forward)
-                    0.1, // applied as a factor to constraint error, how big the kantelpunt is moved when a constraint is hit
-                    0 // controls bounce at limit (0.0 == no bounce)
+            constraint.setLimits(-2.2, // minimum angle of motion, in radians, from the point object 1 starts (going back)
+                -0.6, // maximum angle of motion, in radians, from the point object 1 starts (going forward)
+                0.1, // applied as a factor to constraint error, how big the kantelpunt is moved when a constraint is hit
+                0 // controls bounce at limit (0.0 == no bounce)
             );
 
             return constraint;
@@ -466,22 +505,21 @@
 
         var direction = 1;
 
-        render = function () {
+        render = function() {
             requestAnimationFrame(render);
             renderer.render(scene, camera);
             render_stats.update();
-            ground.__dirtyRotation = true;
+            if (ground) ground.__dirtyRotation = true;
             scene.simulate(undefined, 2);
         };
 
 
         window.onload = initScene;
-
     </script>
 </head>
 
 <body>
-<div id="viewport"></div>
+    <div id="viewport"></div>
 </body>
 
 </html>

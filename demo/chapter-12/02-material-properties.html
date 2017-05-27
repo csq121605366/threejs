@@ -21,7 +21,6 @@
     <script type="text/javascript" src="../libs/chroma.js"></script>
 
     <script type="text/javascript">
-
         'use strict';
 
         Physijs.scripts.worker = '../libs/physijs_worker.js';
@@ -30,13 +29,15 @@
         var scale = chroma.scale(['white', 'blue', 'red', 'yellow']);
 
         var initScene, render, applyForce, setMousePosition, mouse_position,
-                ground_material, box_material,
-                projector, renderer, render_stats, physics_stats, scene, ground, light, camera, box, boxes = [];
+            ground_material, box_material,
+            projector, renderer, render_stats, physics_stats, scene, ground, light, camera, box, boxes = [];
 
-        initScene = function () {
+        initScene = function() {
 
 
-            renderer = new THREE.WebGLRenderer({antialias: true});
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
 
             renderer.setClearColor(new THREE.Color(0x000000));
@@ -52,10 +53,10 @@
             scene.setGravity(new THREE.Vector3(0, -90, 0));
 
             camera = new THREE.PerspectiveCamera(
-                    35,
-                    window.innerWidth / window.innerHeight,
-                    1,
-                    1000
+                35,
+                window.innerWidth / window.innerHeight,
+                1,
+                1000
             );
             camera.position.set(80, 60, 80);
             camera.lookAt(scene.position);
@@ -67,29 +68,33 @@
 
 
             scene.add(light);
-
             // Materials
             ground_material = Physijs.createMaterial(
-                    new THREE.MeshPhongMaterial({map: THREE.ImageUtils.loadTexture('../assets/textures/general/floor-wood.jpg')}),
-                    .9, // high friction
-                    .6 // low restitution
+                new THREE.MeshPhongMaterial({
+                    map: THREE.ImageUtils.loadTexture('../assets/textures/general/floor-wood.jpg')
+                }),
+                .9, // high friction
+                .6 // low restitution
             );
+            //THREE.RepeatWrapping：平铺重复。地板贴图应为具有重复性，如果使用一整张砖墙的纹理贴图会占用较多的内存。所以一般只需要载入一张具有一块或多块的砖瓦的纹理贴图。再把它按照重叠纹理寻址模式在物体表面映射多次，就可以达到和使用整张砖墙贴图同样的效果
+            //THREE.ClampToEdgeWrapping：夹边。超过1.0的值被固定为1.0。超过1.0的其它地方的纹理，沿用最后像素的纹理。用于当叠加过滤时，需要从0.0到1.0精确覆盖且没有模糊边界的纹理。
+            //THREE.MirroredRepeatWrapping：镜像重复。每到边界处纹理翻转，意思就是每个1.0 u或者v处纹理被镜像翻转。
             ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
             ground_material.map.repeat.set(4, 8);
 
             // Ground
             ground = new Physijs.BoxMesh(
-                    new THREE.BoxGeometry(60, 1, 130),
-                    ground_material,
-                    0 // mass
+                new THREE.BoxGeometry(60, 1, 130),
+                ground_material,
+                0 // mass
             );
             ground.receiveShadow = true;
 
 
             var borderLeft = new Physijs.BoxMesh(
-                    new THREE.BoxGeometry(2, 6, 130),
-                    ground_material,
-                    0 // mass
+                new THREE.BoxGeometry(2, 6, 130),
+                ground_material,
+                0 // mass
             );
 
             borderLeft.position.x = -31;
@@ -99,8 +104,8 @@
             ground.add(borderLeft);
 
             var borderRight = new Physijs.BoxMesh(new THREE.BoxGeometry(2, 6, 130),
-                    ground_material,
-                    0 // mass
+                ground_material,
+                0 // mass
             );
             borderRight.position.x = 31;
             borderRight.position.y = 2;
@@ -109,9 +114,9 @@
 
 
             var borderBottom = new Physijs.BoxMesh(
-                    new THREE.BoxGeometry(64, 6, 2),
-                    ground_material,
-                    0 // mass
+                new THREE.BoxGeometry(64, 6, 2),
+                ground_material,
+                0 // mass
             );
 
             borderBottom.position.z = 65;
@@ -119,33 +124,33 @@
             ground.add(borderBottom);
 
             var borderTop = new Physijs.BoxMesh(
-                    new THREE.BoxGeometry(64, 6, 2),
-                    ground_material,
-                    0 // mass
+                new THREE.BoxGeometry(64, 6, 2),
+                ground_material,
+                0 // mass
             );
 
             borderTop.position.z = -65;
             borderTop.position.y = 2;
             ground.add(borderTop);
 
-//            var pilar_material = Physijs.createMaterial(
-//                    new THREE.MeshPhongMaterial({color:0xff3333}),
-//                    .3, // high friction
-//                    .9 // low restitution
-//            );
-//
-//            var pilar = new Physijs.CylinderMesh(new THREE.CylinderGeometry(2,2,24),pilar_material,0);
-//            ground.add(pilar);
-//
-//
-//            var pilar2 = new Physijs.CylinderMesh(new THREE.CylinderGeometry(2,2,24),pilar_material,0);
-//            pilar2.position.x=15;
-//            ground.add(pilar2);
-//
-//
-//            var pilar3 = new Physijs.CylinderMesh(new THREE.CylinderGeometry(2,2,24),pilar_material,0);
-//            ground.add(pilar3);
-//            pilar3.position.x=-15;
+            //            var pilar_material = Physijs.createMaterial(
+            //                    new THREE.MeshPhongMaterial({color:0xff3333}),
+            //                    .3, // high friction
+            //                    .9 // low restitution
+            //            );
+            //
+            //            var pilar = new Physijs.CylinderMesh(new THREE.CylinderGeometry(2,2,24),pilar_material,0);
+            //            ground.add(pilar);
+            //
+            //
+            //            var pilar2 = new Physijs.CylinderMesh(new THREE.CylinderGeometry(2,2,24),pilar_material,0);
+            //            pilar2.position.x=15;
+            //            ground.add(pilar2);
+            //
+            //
+            //            var pilar3 = new Physijs.CylinderMesh(new THREE.CylinderGeometry(2,2,24),pilar_material,0);
+            //            ground.add(pilar3);
+            //            pilar3.position.x=-15;
 
 
             scene.add(ground);
@@ -153,77 +158,76 @@
             var meshes = [];
 
 
-            var controls = new function () {
+            var controls = new function() {
                 this.cubeRestitution = 0.4;
                 this.cubeFriction = 0.4;
                 this.sphereRestitution = 0.9;
                 this.sphereFriction = 0.1;
 
 
-                this.clearMeshes = function () {
-                    meshes.forEach(function (e) {
+                this.clearMeshes = function() {
+                    meshes.forEach(function(e) {
                         scene.remove(e);
                     });
                     meshes = [];
                 };
 
-                this.addSpheres = function () {
+                this.addSpheres = function() {
                     var colorSphere = scale(Math.random()).hex();
                     for (var i = 0; i < 5; i++) {
 
                         box = new Physijs.SphereMesh(
-                                new THREE.SphereGeometry(2, 20),
-                                Physijs.createMaterial(
-                                        new THREE.MeshPhongMaterial(
-                                                {
-                                                    color: colorSphere,
-                                                    opacity: 0.8,
-                                                    transparent: true
-//                                                        map: THREE.ImageUtils.loadTexture( '../assets/textures/general/floor-wood.jpg' )
-                                                }),
-                                        controls.sphereFriction,
-                                        controls.sphereRestitution
-                                )
+                            new THREE.SphereGeometry(2, 20),
+                            Physijs.createMaterial(
+                                new THREE.MeshPhongMaterial({
+                                    color: colorSphere,
+                                    opacity: 0.8,
+                                    transparent: true,
+                                    //     map: THREE.ImageUtils.loadTexture('../assets/textures/general/floor-wood.jpg')
+                                }),
+                                controls.sphereFriction,
+                                controls.sphereRestitution
+                            )
                         );
                         box.position.set(
-                                Math.random() * 50 - 25,
-                                20 + Math.random() * 5,
-                                Math.random() * 50 - 25
+                            Math.random() * 50 - 25,
+                            20 + Math.random() * 5,
+                            Math.random() * 50 - 25
                         );
                         meshes.push(box);
                         scene.add(box);
                     }
                 };
 
-                this.addCubes = function () {
+                this.addCubes = function() {
 
                     var colorBox = scale(Math.random()).hex();
 
                     for (var i = 0; i < 5; i++) {
 
                         box = new Physijs.BoxMesh(
-                                new THREE.BoxGeometry(4, 4, 4),
-//                            new THREE.SphereGeometry( 2, 20 ),
-                                Physijs.createMaterial(
-                                        new THREE.MeshPhongMaterial({
-                                            color: colorBox,
-                                            opacity: 0.8,
-                                            transparent: true
-//                                                map: THREE.ImageUtils.loadTexture( '../assets/textures/general/stone.jpg' )
-                                        }),
-                                        controls.cubeFriction,
-                                        controls.cubeRestitution
-                                )
+                            new THREE.BoxGeometry(4, 4, 4),
+                            //                            new THREE.SphereGeometry( 2, 20 ),
+                            Physijs.createMaterial(
+                                new THREE.MeshPhongMaterial({
+                                    color: colorBox,
+                                    opacity: 0.8,
+                                    transparent: true
+                                        //                                                map: THREE.ImageUtils.loadTexture( '../assets/textures/general/stone.jpg' )
+                                }),
+                                controls.cubeFriction,
+                                controls.cubeRestitution
+                            )
                         );
                         box.position.set(
-                                Math.random() * 50 - 25,
-                                20 + Math.random() * 5,
-                                Math.random() * 50 - 25
+                            Math.random() * 50 - 25,
+                            20 + Math.random() * 5,
+                            Math.random() * 50 - 25
                         );
                         box.rotation.set(
-                                Math.random() * Math.PI * 2,
-                                Math.random() * Math.PI * 2,
-                                Math.random() * Math.PI * 2);
+                            Math.random() * Math.PI * 2,
+                            Math.random() * Math.PI * 2,
+                            Math.random() * Math.PI * 2);
 
                         meshes.push(box);
                         scene.add(box);
@@ -249,7 +253,7 @@
         var stepX;
         var direction = 1;
 
-        render = function () {
+        render = function() {
             requestAnimationFrame(render);
             renderer.render(scene, camera);
             render_stats.update();
@@ -263,12 +267,11 @@
 
 
         window.onload = initScene;
-
     </script>
 </head>
 
 <body>
-<div id="viewport"></div>
+    <div id="viewport"></div>
 </body>
 
 </html>
