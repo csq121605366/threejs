@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>3D model</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/STLLoader.js"></script>
+
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
+    <script type="text/javascript" src="../libs/spin.js"></script>
+    <script type="text/javascript" src="../libs/ThreeBSP.js"></script>
+    <script type="text/javascript" src="../libs/jquery-1.9.0.js"></script>
+
+    <!--<script type="text/javascript" src="../libs/SceneLoader.js"></script>
+    <script type="text/javascript" src="../libs/SceneExporter.js"></script>-->
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
+
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+        function toRadians(angle) {
+            return angle * (Math.PI / 180);
+        }
+        // once everything is loaded, we run our Three.js stuff.
+        function init() {
+            var result;
+            var stats = initStats();
+            // create a scene, that will hold all our elements such as objects, cameras and lights.
+            var scene = new THREE.Scene();
+            // create a camera, which defines where we're looking at.
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            // position and point the camera to the center of the scene
+            camera.position.x = 100;
+            camera.position.y = 100;
+            camera.position.z = 100;
+            camera.lookAt(new THREE.Vector3(0, 40, 0));
+            // create a render and set the size
+            var webGLRenderer = new THREE.WebGLRenderer();
+            webGLRenderer.setClearColor(new THREE.Color(0xffffff));
+            webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+            webGLRenderer.shadowMapEnabled = true;
+
+            var planeGeometry = new THREE.PlaneGeometry(100, 100, 1, 1);
+            var planeMaterial = new THREE.MeshLambertMaterial({
+                color: 0xffffff
+            });
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.receiveShadow = true;
+            plane.rotation.x = -0.5 * Math.PI;
+            scene.add(plane);
+
+            var orbitControls = new THREE.OrbitControls(camera);
+            orbitControls.autoRotate = false;
+            var clock = new THREE.Clock();
+
+            var ambientLight = new THREE.AmbientLight(0x383838);
+            scene.add(ambientLight);
+            // add spotlight for the shadows
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(150, 150, 150);
+            scene.add(spotLight);
+            //create objects
+            // var sphere= createMesh(new THREE.SphereGeometry(5, 20, 30));
+            // sphere.position.set(10,50,31)
+            // scene.add(sphere);
+            //load tooth 3D model
+            var loader = new THREE.STLLoader();
+            var tooth = new THREE.Object3D();
+            var tooth2 = new THREE.Object3D();
+            loader.load("../assets/1.stl", function(geometry) {
+                loader.load("../assets/2.stl", function(geometry) {
+                    var mat = new THREE.MeshLambertMaterial({
+                        color: 0xFFFFFF
+                    });
+                    tooth2 = new THREE.Mesh(geometry, mat);
+                    tooth2.rotation.x = -0.5 * Math.PI;
+                    tooth2.scale.set(1, 1, 1);
+                    scene.add(tooth2);
+                });
+                var mat = new THREE.MeshLambertMaterial({
+                    color: 0xFFFFFF
+                });
+                tooth = new THREE.Mesh(geometry, mat);
+                tooth.rotation.x = -0.5 * Math.PI;
+                tooth.scale.set(1, 1, 1);
+                scene.add(tooth);
+            });
+
+
+
+            // 存储信息
+            var store, storeMesh = [];
+            // setup the control gui
+            var controls = new function() {
+
+                // this.PosX = sphere.position.x;
+                // this.PosY = sphere.position.y;
+                // this.PosZ = sphere.position.z;
+                // this.Scale = 1;
+                // this.actionSphere="subtract";
+
+                this.rx = 3;
+                this.ry = 0;
+                this.rz = 3.3;
+
+                this.px = 10.8;
+                this.py = 29;
+                this.pz = 42;
+
+                this.rx2 = 2.9;
+                this.ry2 = 0;
+                this.rz2 = 3.1;
+
+                this.px2 = 3.3;
+                this.py2 = 57;
+                this.pz2 = 38;
+
+                this.showResult = function() {
+                    redrawResult();
+                };
+                this.store = function() {
+                    console.count('test')
+                    var $oPos = controls;
+                    var obj = {};
+                    $.each($oPos, function(index, val) {
+                        if (typeof val === 'number') {
+                            obj[index] = val;
+                        }
+                    })
+                    storeMesh.push(obj);
+                    localStorage.setItem('store', JSON.stringify(storeMesh));
+                    // console.log(JSON.parse(localStorage.getItem('store')))
+                }
+                this.redo = function() {
+
+                    store = localStorage.getItem('store');
+                    if (store.length > 0) {
+                        var $oPos = JSON.parse(store);
+                        console.log($oPos)
+                        $.each($oPos, function(index, val) {
+                            controls[index] = val;
+                        })
+                    }
+                }
+                this.do = function() {
+
+                }
+
+            };
+            var group;
+            var gui = new dat.GUI();
+            // var guiSphere = gui.addFolder("Sphere");
+            // guiSphere.add(controls, "PosX", 0, 50).onChange(function () {
+            //     sphere.position.set(controls.PosX, controls.PosY, controls.PosZ);
+            // });
+            // guiSphere.add(controls, "PosY", 0, 50).onChange(function () {
+            //     sphere.position.set(controls.PosX, controls.PosY, controls.PosZ)
+            // });
+            // guiSphere.add(controls, "PosZ", 0, 50).onChange(function () {
+            //     sphere.position.set(controls.PosX, controls.PosY, controls.PosZ)
+            // });
+            // guiSphere.add(controls, "Scale", 0, 10).onChange(function (e) {
+            //     sphere.scale.set(e, e, e)
+            // });
+            // guiSphere.add(controls, "actionSphere", ["subtract", "intersect", "union", "none"]);
+            gui.add(controls, 'rx', 0, 10)
+            gui.add(controls, 'ry', 0, 10)
+            gui.add(controls, 'rz', 0, 10)
+            gui.add(controls, 'px', 0, 100)
+            gui.add(controls, 'py', 0, 100)
+            gui.add(controls, 'pz', 0, 100)
+            gui.add(controls, 'rx2', 0, 10)
+            gui.add(controls, 'ry2', 0, 10)
+            gui.add(controls, 'rz2', 0, 10)
+            gui.add(controls, 'px2', 0, 100)
+            gui.add(controls, 'py2', 0, 100)
+            gui.add(controls, 'pz2', 0, 100)
+            gui.add(controls, "showResult");
+            var t1 = gui.addFolder('前进和后退');
+            t1.add(controls, 'store').onChange(controls.store)
+            t1.add(controls, 'redo').onChange(controls.redo)
+
+
+
+
+            // console.log("done");
+            // var toothBSP= new ThreeBSP(tooth);
+            // console.log("done");
+
+            function setCamControls() {
+
+            }
+            // add the output of the renderer to the html element
+            document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
+
+            // call the render function
+            var step = 0;
+
+
+            render();
+
+            function redrawResult() {
+
+
+                // make the call async to avoid blocking the thread. Need
+                // to set timeout > 1, if not executed immediately.
+                setTimeout(function() {
+                    scene.remove(result);
+                    var sphereBSP = new ThreeBSP(sphere);
+                    var toothBSP = new ThreeBSP(tooth);
+                    var resultBSP;
+
+
+                    // first do the sphere
+                    switch (controls.actionSphere) {
+                        case "subtract":
+                            resultBSP = sphereBSP.subtract(toothBSP);
+                            break;
+                        case "intersect":
+                            resultBSP = sphereBSP.intersect(toothBSP);
+                            break;
+                        case "union":
+                            resultBSP = sphereBSP.union(toothBSP);
+                            break;
+                        case "none": // noop;
+                    }
+
+
+
+                    if (controls.actionSphere === "none") {
+                        // do nothing
+                    } else {
+                        result = resultBSP.toMesh();
+                        result.geometry.computeFaceNormals();
+                        result.geometry.computeVertexNormals();
+                        scene.add(result);
+                    }
+
+                }, 200);
+            }
+
+
+
+
+            function render() {
+                stats.update();
+
+                var delta = clock.getDelta();
+                orbitControls.update(delta);
+
+                if (tooth && tooth2) {
+                    tooth.rotation.x = controls.rx;
+                    tooth.rotation.y = controls.ry;
+                    tooth.rotation.z = controls.rz;
+
+                    tooth.position.x = controls.px;
+                    tooth.position.y = controls.py;
+                    tooth.position.z = controls.pz;
+
+                    tooth2.rotation.x = controls.rx2;
+                    tooth2.rotation.y = controls.ry2;
+                    tooth2.rotation.z = controls.rz2;
+
+                    tooth2.position.x = controls.px2;
+                    tooth2.position.y = controls.py2;
+                    tooth2.position.z = controls.pz2;
+
+                }
+
+                // render using requestAnimationFrame
+                requestAnimationFrame(render);
+                webGLRenderer.render(scene, camera);
+            }
+
+            function initStats() {
+
+                var stats = new Stats();
+                stats.setMode(0); // 0: fps, 1: ms
+
+                // Align top-left
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '20px';
+
+                document.getElementById("Stats-output").appendChild(stats.domElement);
+
+                return stats;
+            }
+
+            function createMesh(geom) {
+
+                // assign two materials
+                var meshMaterial = new THREE.MeshNormalMaterial();
+                meshMaterial.side = THREE.DoubleSide;
+                var wireFrameMat = new THREE.MeshBasicMaterial({
+                    transparency: true,
+                    opacity: 0.5,
+                    wireframeLinewidth: 0.5
+                });
+                wireFrameMat.wireframe = true;
+
+                // create a multimaterial
+                var mesh = new THREE.Mesh(geom, wireFrameMat);
+
+                return mesh;
+            }
+
+        }
+        window.onload = init;
+    </script>
+</body>
+
+</html>

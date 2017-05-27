@@ -41,7 +41,7 @@
             // create a render and set the size
             var renderer = new THREE.WebGLRenderer();
 
-            renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+            renderer.setClearColor(new THREE.Color(0xEEEEEE));
             renderer.setSize(window.innerWidth, window.innerHeight);
 
 
@@ -56,7 +56,7 @@
             // rotate and position the plane
             plane.rotation.x = -0.5 * Math.PI;
             plane.position.x =
-                plane.position.y = 0;
+            plane.position.y = 0;
             plane.position.z = 0;
 
             // add the plane to the scene
